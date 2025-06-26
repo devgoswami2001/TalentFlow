@@ -19,7 +19,7 @@ export default function DashboardLayout({
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link href="/dashboard" className="flex items-center gap-2 font-semibold font-headline">
               <Icons.logo className="h-6 w-6 text-primary" />
-              <span>TalentFlow</span>
+              <span>Hyresense</span>
             </Link>
           </div>
           <div className="flex-1">
@@ -47,7 +47,7 @@ export default function DashboardLayout({
                   className="flex items-center gap-2 text-lg font-semibold"
                 >
                   <Icons.logo className="h-6 w-6 text-primary" />
-                  <span className="sr-only">TalentFlow</span>
+                  <span className="sr-only">Hyresense</span>
                 </Link>
                 <DashboardNav />
               </nav>

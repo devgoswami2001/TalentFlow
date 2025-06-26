@@ -15,7 +15,7 @@ const fontHeadline = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'TalentFlow',
+  title: 'Hyresense',
   description: 'The modern way to manage your hiring pipeline.',
 };
 

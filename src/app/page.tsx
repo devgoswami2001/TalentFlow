@@ -14,7 +14,7 @@ export default function LoginPage() {
           <div className="grid gap-2 text-center">
             <div className="flex items-center justify-center gap-2 mb-4">
               <Icons.logo className="w-8 h-8 text-primary" />
-              <h1 className="text-3xl font-bold font-headline">TalentFlow</h1>
+              <h1 className="text-3xl font-bold font-headline">Hyresense</h1>
             </div>
             <p className="text-balance text-muted-foreground">
               Enter your email below to login to your account
@@ -59,7 +59,7 @@ export default function LoginPage() {
       </div>
       <div className="hidden bg-muted lg:block">
         <Image
-          src="https://placehold.co/1200x900/A06CD5/F1E5F9"
+          src="https://placehold.co/1200x900/2664EB/FFFFFF"
           alt="Image"
           width="1920"
           height="1080"
