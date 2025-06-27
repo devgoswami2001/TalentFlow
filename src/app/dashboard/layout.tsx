@@ -27,7 +27,7 @@ export default function DashboardLayout({
               href="/dashboard"
               className="flex items-center gap-2 font-semibold font-headline"
             >
-              <Icons.logo className="h-6 w-6 text-primary" />
+              <Icons.logo className="h-6 w-6" />
               <span>Hyresense</span>
             </Link>
           </div>
@@ -55,7 +55,7 @@ export default function DashboardLayout({
                     href="/dashboard"
                     className="flex items-center gap-2 font-semibold font-headline"
                   >
-                    <Icons.logo className="h-6 w-6 text-primary" />
+                    <Icons.logo className="h-6 w-6" />
                     <span>Hyresense</span>
                   </Link>
               </div>
