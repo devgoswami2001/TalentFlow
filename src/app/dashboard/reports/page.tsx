@@ -85,7 +85,7 @@ export default function ReportsPage() {
               Conversion rates across different hiring stages.
             </CardDescription>
           </CardHeader>
-          <CardContent className="pl-2">
+          <CardContent>
             <HiringFunnelChart />
           </CardContent>
         </Card>
@@ -109,7 +109,7 @@ export default function ReportsPage() {
               Average days to hire for different roles.
             </CardDescription>
           </CardHeader>
-          <CardContent className="pl-2">
+          <CardContent>
             <TimeToFillChart />
           </CardContent>
         </Card>
