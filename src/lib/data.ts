@@ -22,6 +22,16 @@ export type Job = {
     id: number;
     title: string;
     description: string;
+    requiredSkills: string[];
+    experienceLevel: 'Entry-level' | 'Mid-level' | 'Senior' | 'Lead' | 'Internship';
+    location: 'Remote' | 'On-site' | 'Hybrid';
+    salaryMin?: number;
+    salaryMax?: number;
+    employmentType: 'Full-time' | 'Part-time' | 'Contract';
+    applicationDeadline: Date;
+    status: 'Active' | 'Draft' | 'Closed';
+    datePosted: Date;
+    screeningQuestions: string[];
 };
 
 export type Applicant = {
@@ -42,17 +52,59 @@ export const jobs: Job[] = [
     {
         id: 1,
         title: 'Senior Frontend Developer',
-        description: `We are looking for an experienced Senior Frontend Developer to join our team. Responsibilities include developing new user-facing features, building reusable components, and optimizing applications for maximum speed and scalability. Required skills: React, TypeScript, Next.js, Tailwind CSS, and strong understanding of web performance.`
+        description: `We are looking for an experienced Senior Frontend Developer to join our team. Responsibilities include developing new user-facing features, building reusable components, and optimizing applications for maximum speed and scalability. Required skills: React, TypeScript, Next.js, Tailwind CSS, and strong understanding of web performance.`,
+        requiredSkills: ['React', 'TypeScript', 'Next.js', 'Tailwind CSS', 'Web Performance'],
+        experienceLevel: 'Senior',
+        location: 'Remote',
+        salaryMin: 120000,
+        salaryMax: 150000,
+        employmentType: 'Full-time',
+        applicationDeadline: new Date('2025-08-30'),
+        status: 'Active',
+        datePosted: new Date('2025-07-01'),
+        screeningQuestions: [
+            'Describe a challenging project you worked on with Next.js.',
+            'How do you approach web performance optimization?'
+        ]
     },
     {
         id: 2,
         title: 'Product Manager',
-        description: `We are seeking a talented Product Manager to lead the development of our core products. You will be responsible for the product planning and execution throughout the Product Lifecycle, including gathering and prioritizing product and customer requirements. Required skills: Product strategy, roadmap planning, user research, agile methodologies, and excellent communication skills.`
+        description: `We are seeking a talented Product Manager to lead the development of our core products. You will be responsible for the product planning and execution throughout the Product Lifecycle, including gathering and prioritizing product and customer requirements. Required skills: Product strategy, roadmap planning, user research, agile methodologies, and excellent communication skills.`,
+        requiredSkills: ['Product Strategy', 'Roadmap Planning', 'User Research', 'Agile Methodologies', 'Communication'],
+        experienceLevel: 'Mid-level',
+        location: 'On-site',
+        employmentType: 'Full-time',
+        applicationDeadline: new Date('2025-08-15'),
+        status: 'Active',
+        datePosted: new Date('2025-06-25'),
+        screeningQuestions: []
     },
     {
         id: 3,
         title: 'UX Designer',
-        description: `We're hiring a UX Designer to create satisfying and compelling experiences for the users of our products. You'll be working on user flows, wireframes, prototypes, and conducting user research. Required skills: Figma, Sketch, user-centered design principles, prototyping, and collaboration with product and engineering teams.`
+        description: `We're hiring a UX Designer to create satisfying and compelling experiences for the users of our products. You'll be working on user flows, wireframes, prototypes, and conducting user research. Required skills: Figma, Sketch, user-centered design principles, prototyping, and collaboration with product and engineering teams.`,
+        requiredSkills: ['Figma', 'Sketch', 'User-Centered Design', 'Prototyping'],
+        experienceLevel: 'Mid-level',
+        location: 'Hybrid',
+        employmentType: 'Contract',
+        applicationDeadline: new Date('2025-08-10'),
+        status: 'Closed',
+        datePosted: new Date('2025-06-10'),
+        screeningQuestions: ['Please provide a link to your portfolio.']
+    },
+    {
+        id: 4,
+        title: 'Marketing Intern',
+        description: 'Join our marketing team as an intern and gain hands-on experience in digital marketing, content creation, and social media management.',
+        requiredSkills: ['Social Media', 'Content Writing', 'SEO Basics'],
+        experienceLevel: 'Internship',
+        location: 'Remote',
+        employmentType: 'Part-time',
+        applicationDeadline: new Date('2025-09-01'),
+        status: 'Draft',
+        datePosted: new Date('2025-07-25'),
+        screeningQuestions: ['What are your favorite marketing campaigns and why?']
     }
 ];
 
@@ -143,6 +195,24 @@ export const applicants: Applicant[] = [
     - Built responsive websites using CSS and HTML.
     ---
     Skills: React, JavaScript, HTML, CSS`
+  },
+  {
+    id: 5,
+    name: 'James Wilson',
+    email: 'james@example.com',
+    phone: '123-456-7894',
+    avatar: 'https://placehold.co/40x40',
+    jobId: 1,
+    jobTitle: 'Senior Frontend Developer',
+    status: 'Applied',
+    appliedDate: '2025-07-22T00:00:00Z',
+    resumeText: `James Wilson - Frontend Engineer
+    ---
+    Experience:
+    - Developed and maintained responsive web applications using React and Redux.
+    - Collaborated with designers to implement UI features.
+    ---
+    Skills: React, Redux, JavaScript, HTML, CSS, Git`
   }
 ];
 
@@ -191,7 +261,7 @@ export const activityLogs: ActivityLog[] = [
         log_id: 201,
         action: 'Job posted',
         performed_by: 'ritika@hyresense.com',
-        target: 'Job #123 - Senior Frontend Developer',
+        target: 'Job #1 - Senior Frontend Developer',
         details: 'Created a new job posting for a senior frontend developer.',
         timestamp: '2025-06-26 10:00:00',
     },
@@ -199,8 +269,8 @@ export const activityLogs: ActivityLog[] = [
         log_id: 202,
         action: 'Edited applicant status',
         performed_by: 'ritika@hyresense.com',
-        target: 'Applicant #345 - Rohan Sharma',
-        details: "Changed status from 'Interviewed' to 'Selected'",
+        target: 'Applicant #3 - Noah Williams',
+        details: "Changed status from 'Applied' to 'Shortlisted'",
         timestamp: '2025-06-26 11:04:20',
     },
     {
