@@ -9,7 +9,6 @@ import { DollarSign, Users, Clock, Zap } from 'lucide-react';
 import { applicants } from "@/lib/data";
 import { HiringFunnelChart } from "@/components/hiring-funnel-chart";
 import { SourceOfHireChart } from "@/components/source-of-hire-chart";
-import { TimeToFillChart } from "@/components/time-to-fill-chart";
 
 export default function ReportsPage() {
 
@@ -101,18 +100,6 @@ export default function ReportsPage() {
           </CardContent>
         </Card>
       </div>
-
-       <Card>
-          <CardHeader>
-            <CardTitle className="font-headline">Time to Fill by Department</CardTitle>
-            <CardDescription>
-              Average days to hire for different roles.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <TimeToFillChart />
-          </CardContent>
-        </Card>
     </div>
   );
 }
