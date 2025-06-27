@@ -1,3 +1,4 @@
+
 import {
   Card,
   CardContent,
@@ -5,10 +6,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { DollarSign, Users, Clock, Zap } from 'lucide-react';
+import { DollarSign, Users, Clock, Zap, Download } from 'lucide-react';
 import { applicants } from "@/lib/data";
 import { HiringFunnelChart } from "@/components/hiring-funnel-chart";
 import { SourceOfHireChart } from "@/components/source-of-hire-chart";
+import { Button } from "@/components/ui/button";
 
 export default function ReportsPage() {
 
@@ -23,6 +25,10 @@ export default function ReportsPage() {
     <div className="space-y-6">
        <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight font-headline">Reports & Analytics</h2>
+        <Button>
+            <Download className="mr-2 h-4 w-4" />
+            Download Report
+        </Button>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
