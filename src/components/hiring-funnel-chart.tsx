@@ -1,8 +1,9 @@
+
 'use client';
 
 import { Funnel, FunnelChart, LabelList, ResponsiveContainer, Tooltip } from 'recharts';
 import { applicants } from '@/lib/data';
-import { ChartTooltipContent } from './ui/chart';
+import { ChartContainer, ChartTooltipContent } from './ui/chart';
 
 const statusOrder = ['Applied', 'Shortlisted', 'Interview', 'Offer', 'Hired'];
 
@@ -15,10 +16,21 @@ const funnelData = statusOrder.map((status, index) => {
     return { name: status, value: count, fill: `hsl(var(--chart-${index + 1}))` };
 });
 
+const chartConfig = {
+    value: {
+        label: 'Candidates',
+    },
+    Applied: { label: 'Applied', color: 'hsl(var(--chart-1))' },
+    Shortlisted: { label: 'Shortlisted', color: 'hsl(var(--chart-2))' },
+    Interview: { label: 'Interview', color: 'hsl(var(--chart-3))' },
+    Offer: { label: 'Offer', color: 'hsl(var(--chart-4))' },
+    Hired: { label: 'Hired', color: 'hsl(var(--chart-5))' },
+} as const;
+
 
 export function HiringFunnelChart() {
   return (
-    <div className="h-[350px] w-full">
+    <ChartContainer config={chartConfig} className="h-[350px] w-full">
         <ResponsiveContainer width="100%" height="100%">
             <FunnelChart>
                 <Tooltip 
@@ -39,6 +51,6 @@ export function HiringFunnelChart() {
                 </Funnel>
             </FunnelChart>
         </ResponsiveContainer>
-    </div>
+    </ChartContainer>
   );
 }
