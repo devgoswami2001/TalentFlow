@@ -98,3 +98,51 @@ export const activityLogs: ActivityLog[] = [
         timestamp: '2025-06-27 15:12:00',
     }
 ]
+
+export type NewsPost = {
+  id: number;
+  title: string;
+  content: string;
+  imageUrl?: string;
+  videoUrl?: string;
+  externalLink?: string;
+  category: "Hiring Announcements" | "Company Culture" | "Industry News" | "Job Fairs / Events";
+  visibility: "Public" | "Internal";
+  author: string;
+  timestamp: string;
+}
+
+export const newsPosts: NewsPost[] = [
+    {
+        id: 1,
+        title: "New Senior Product Designer Role Open!",
+        content: "We are excited to announce a new opening for a Senior Product Designer to join our growing team. We are looking for a creative and passionate individual to help shape the future of Hyresense. Apply now through our careers page!",
+        imageUrl: "https://placehold.co/800x400",
+        externalLink: "#",
+        category: "Hiring Announcements",
+        visibility: "Public",
+        author: "Ritika Mehra",
+        timestamp: "2025-07-20T10:00:00Z"
+    },
+    {
+        id: 2,
+        title: "Our Annual Team Retreat in the Mountains",
+        content: "This year's team retreat was a huge success! We spent three days in the serene mountains, focusing on team-building, brainstorming for the upcoming quarter, and of course, having a lot of fun. Check out some of the highlights!",
+        imageUrl: "https://placehold.co/800x400",
+        videoUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        category: "Company Culture",
+        visibility: "Internal",
+        author: "Admin User",
+        timestamp: "2025-07-18T15:30:00Z"
+    },
+    {
+        id: 3,
+        title: "Meet Us at the National Tech Job Fair 2025",
+        content: "Hyresense will be at the National Tech Job Fair next month! Visit our booth (#24B) to learn about our open roles and what it's like to work with us. We can't wait to meet you.",
+        externalLink: "#",
+        category: "Job Fairs / Events",
+        visibility: "Public",
+        author: "Ritika Mehra",
+        timestamp: "2025-07-15T09:00:00Z"
+    }
+];
