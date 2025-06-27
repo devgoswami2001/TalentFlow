@@ -1,3 +1,4 @@
+
 export type User = {
   id: number;
   name: string;
@@ -16,6 +17,135 @@ export type ActivityLog = {
     details: string;
     timestamp: string;
 };
+
+export type Job = {
+    id: number;
+    title: string;
+    description: string;
+};
+
+export type Applicant = {
+  id: number;
+  name: string;
+  email: string;
+  phone: string;
+  avatar: string;
+  jobId: number;
+  jobTitle: string;
+  status: 'Applied' | 'Shortlisted' | 'Interview' | 'Offer' | 'Hired' | 'Rejected';
+  appliedDate: string;
+  resumeText: string;
+  matchPercentage?: number;
+};
+
+export const jobs: Job[] = [
+    {
+        id: 1,
+        title: 'Senior Frontend Developer',
+        description: `We are looking for an experienced Senior Frontend Developer to join our team. Responsibilities include developing new user-facing features, building reusable components, and optimizing applications for maximum speed and scalability. Required skills: React, TypeScript, Next.js, Tailwind CSS, and strong understanding of web performance.`
+    },
+    {
+        id: 2,
+        title: 'Product Manager',
+        description: `We are seeking a talented Product Manager to lead the development of our core products. You will be responsible for the product planning and execution throughout the Product Lifecycle, including gathering and prioritizing product and customer requirements. Required skills: Product strategy, roadmap planning, user research, agile methodologies, and excellent communication skills.`
+    },
+    {
+        id: 3,
+        title: 'UX Designer',
+        description: `We're hiring a UX Designer to create satisfying and compelling experiences for the users of our products. You'll be working on user flows, wireframes, prototypes, and conducting user research. Required skills: Figma, Sketch, user-centered design principles, prototyping, and collaboration with product and engineering teams.`
+    }
+];
+
+export const applicants: Applicant[] = [
+  {
+    id: 1,
+    name: 'Liam Johnson',
+    email: 'liam@example.com',
+    phone: '123-456-7890',
+    avatar: 'https://placehold.co/40x40',
+    jobId: 1,
+    jobTitle: 'Senior Frontend Developer',
+    status: 'Interview',
+    appliedDate: '2025-07-15T00:00:00Z',
+    matchPercentage: 92,
+    resumeText: `Liam Johnson - Senior Frontend Developer
+    ---
+    Experience:
+    - 5+ years of experience in frontend development.
+    - Proficient in React, TypeScript, and Next.js.
+    - Extensive experience with Tailwind CSS for rapid UI development.
+    - Focused on web performance and building scalable applications.
+    - Built and maintained component libraries for design systems.
+    ---
+    Skills: React, TypeScript, Next.js, Tailwind CSS, Web Performance, JavaScript, HTML, CSS`
+  },
+  {
+    id: 2,
+    name: 'Olivia Smith',
+    email: 'olivia@example.com',
+    phone: '123-456-7891',
+    avatar: 'https://placehold.co/40x40',
+    jobId: 2,
+    jobTitle: 'Product Manager',
+    status: 'Shortlisted',
+    appliedDate: '2025-07-12T00:00:00Z',
+    matchPercentage: 85,
+    resumeText: `Olivia Smith - Product Manager
+    ---
+    Summary:
+    A data-driven Product Manager with a knack for user-centric design.
+    ---
+    Experience:
+    - Led product strategy and roadmap planning for B2B SaaS products.
+    - Conducted extensive user research to validate hypotheses.
+    - Worked closely with engineering teams in an agile environment.
+    - Strong communicator and team collaborator.
+    ---
+    Skills: Product Strategy, Roadmap Planning, User Research, Agile Methodologies, JIRA, Communication`
+  },
+  {
+    id: 3,
+    name: 'Noah Williams',
+    email: 'noah@example.com',
+    phone: '123-456-7892',
+    avatar: 'https://placehold.co/40x40',
+    jobId: 3,
+    jobTitle: 'UX Designer',
+    status: 'Applied',
+    appliedDate: '2025-07-20T00:00:00Z',
+    matchPercentage: 78,
+    resumeText: `Noah Williams - UX Designer
+    ---
+    Portfolio: noahwilliams.design
+    ---
+    Experience:
+    - Designed user flows and wireframes for mobile and web applications.
+    - Created high-fidelity prototypes using Figma and Sketch.
+    - Collaborated with product and engineering teams to deliver intuitive user interfaces.
+    ---
+    Skills: Figma, Prototyping, User-Centered Design, Wireframing, User Flows, Collaboration`
+  },
+  {
+    id: 4,
+    name: 'Emma Brown',
+    email: 'emma@example.com',
+    phone: '123-456-7893',
+    avatar: 'https://placehold.co/40x40',
+    jobId: 1,
+    jobTitle: 'Senior Frontend Developer',
+    status: 'Applied',
+    appliedDate: '2025-07-18T00:00:00Z',
+    resumeText: `Emma Brown - Frontend Developer
+    ---
+    Experience:
+    - 3 years of experience with React and JavaScript.
+    - Some experience with TypeScript.
+    - Built responsive websites using CSS and HTML.
+    ---
+    Skills: React, JavaScript, HTML, CSS`
+  }
+];
+
 
 export const users: User[] = [
   {

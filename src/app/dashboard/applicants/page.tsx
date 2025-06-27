@@ -1,29 +1,23 @@
+import { ApplicantManagement } from '@/components/applicant-management';
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Users } from 'lucide-react';
+} from '@/components/ui/card';
 
 export default function ApplicantsPage() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline">Applicants</CardTitle>
+        <CardTitle className="font-headline">Applicant Management</CardTitle>
         <CardDescription>
-          This is where you will manage all applicants across all jobs.
+          View, analyze, and manage all applicants for your job postings.
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed rounded-lg">
-          <Users className="w-16 h-16 text-muted-foreground mb-4" />
-          <h3 className="text-xl font-bold">Applicant Management Coming Soon</h3>
-          <p className="text-muted-foreground">
-            A comprehensive list of all candidates will be available here.
-          </p>
-        </div>
+        <ApplicantManagement />
       </CardContent>
     </Card>
   );

@@ -1,3 +1,4 @@
+
 "use server";
 
 import { analyzeResume } from "@/ai/flows/resume-analyzer";
@@ -50,6 +51,26 @@ export async function onAnalyzeResume(
       data: result,
     };
   } catch (error) {
+    console.error("Error during form analysis:", error);
     return { message: "An unexpected error occurred during analysis." };
+  }
+}
+
+export async function getAnalysisForApplicant(
+  resumeText: string,
+  jobDescription: string
+) {
+  if (!resumeText || !jobDescription) {
+    throw new Error("Resume text and job description are required.");
+  }
+  try {
+    const result = await analyzeResume({ jobDescription, resumeText });
+    if (!result || !result.highlightedResume) {
+      throw new Error("Analysis failed to produce a valid result. The model may have returned an empty response.");
+    }
+    return result;
+  } catch (error) {
+    console.error("Error during applicant analysis:", error);
+    throw new Error("An unexpected error occurred during AI analysis. Please check the server logs.");
   }
 }
