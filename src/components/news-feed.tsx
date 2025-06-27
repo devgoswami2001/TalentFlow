@@ -63,7 +63,7 @@ import { Separator } from "@/components/ui/separator";
 const newsPostFormSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters." }),
   content: z.string().min(10, { message: "Content must be at least 10 characters." }),
-  imageUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
+  imageUrl: z.string().optional().or(z.literal('')),
   videoUrl: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
   externalLink: z.string().url({ message: "Please enter a valid URL." }).optional().or(z.literal('')),
   category: z.enum(["Hiring Announcements", "Company Culture", "Industry News", "Job Fairs / Events"]),
@@ -177,11 +177,50 @@ export function NewsFeed() {
                 name="imageUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Image URL</FormLabel>
+                    <FormLabel>Image</FormLabel>
                     <FormControl>
-                      <Input placeholder="https://example.com/image.png" {...field} />
+                      <Input
+                        type="file"
+                        accept="image/png, image/jpeg, image/gif, image/webp"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              field.onChange(reader.result as string);
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
                     </FormControl>
+                    <FormDescription>
+                      Optionally, upload an image for the news post.
+                    </FormDescription>
                     <FormMessage />
+                     {field.value && (
+                      <div className="mt-4 space-y-2">
+                        <p className="text-sm font-medium">Image Preview</p>
+                        <div className="relative w-48 h-28">
+                          <Image
+                            src={field.value}
+                            alt="Post image preview"
+                            fill
+                            className="rounded-md object-cover"
+                            data-ai-hint="company announcement"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          variant="link"
+                          size="sm"
+                          className="h-auto p-0 text-destructive hover:text-destructive"
+                          onClick={() => field.onChange("")}
+                        >
+                          Remove Image
+                        </Button>
+                      </div>
+                    )}
                   </FormItem>
                 )}
               />
@@ -293,14 +332,15 @@ export function NewsFeed() {
           {posts.length > 0 ? posts.map((post) => (
             <Card key={post.id} className="overflow-hidden flex flex-col">
                 {post.imageUrl && (
-                    <Image
-                        src={post.imageUrl}
-                        alt={post.title}
-                        width={800}
-                        height={400}
-                        className="w-full object-cover aspect-video"
-                        data-ai-hint="announcement news"
-                    />
+                    <div className="relative w-full aspect-video">
+                        <Image
+                            src={post.imageUrl}
+                            alt={post.title}
+                            fill
+                            className="w-full object-cover"
+                            data-ai-hint="announcement news"
+                        />
+                    </div>
                 )}
               <div className="flex flex-col flex-1">
                 <CardHeader>
