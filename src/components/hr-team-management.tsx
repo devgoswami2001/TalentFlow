@@ -43,7 +43,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
     AlertDialog,
@@ -130,7 +129,7 @@ export function HRTeamManagement() {
         id: Math.max(...users.map(u => u.id)) + 1,
         ...data,
         status: 'active',
-        avatar: 'https://placehold.co/40x40'
+        avatar: `https://placehold.co/40x40`
       };
       setUsers([...users, newUser]);
       setIsAddUserOpen(false);
@@ -268,7 +267,7 @@ export function HRTeamManagement() {
                         <div className="flex items-center gap-3">
                             <Avatar>
                                 <AvatarImage src={user.avatar} alt={user.name} data-ai-hint="person portrait"/>
-                                <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                <AvatarFallback>{user.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                             </Avatar>
                             {user.name}
                         </div>

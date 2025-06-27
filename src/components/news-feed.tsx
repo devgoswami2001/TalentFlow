@@ -269,7 +269,7 @@ export function NewsFeed() {
   );
 
   return (
-    <>
+    <div className="space-y-6">
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -287,9 +287,11 @@ export function NewsFeed() {
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="space-y-6">
+      </Card>
+
+        <div className="grid gap-6 lg:grid-cols-2 xl:grid-cols-3">
           {posts.length > 0 ? posts.map((post) => (
-            <Card key={post.id} className="overflow-hidden">
+            <Card key={post.id} className="overflow-hidden flex flex-col">
                 {post.imageUrl && (
                     <Image
                         src={post.imageUrl}
@@ -300,79 +302,88 @@ export function NewsFeed() {
                         data-ai-hint="announcement news"
                     />
                 )}
-              <CardHeader>
-                <div className="flex justify-between items-start">
-                    <div>
-                        <div className="flex items-center gap-2 mb-2 flex-wrap">
-                           <Badge variant="secondary">{post.category}</Badge>
-                           <Badge variant={post.visibility === 'Public' ? 'outline' : 'default'} className="flex items-center gap-1">
-                             {post.visibility === 'Public' ? <Globe className="h-3 w-3" /> : <Users className="h-3 w-3" />}
-                             {post.visibility}
-                           </Badge>
-                        </div>
-                        <CardTitle className="font-headline text-2xl">{post.title}</CardTitle>
-                    </div>
-                    <div className="flex items-center gap-1">
-                         <Button variant="ghost" size="icon" onClick={() => handleOpenFormDialog(post)}>
-                            <FilePenLine className="h-4 w-4" />
-                            <span className="sr-only">Edit</span>
-                         </Button>
-                         <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
-                                    <Trash2 className="h-4 w-4" />
-                                    <span className="sr-only">Delete</span>
-                                </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete this news post.
-                                </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeletePost(post.id)} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                         </AlertDialog>
-                    </div>
-                </div>
-                 <CardDescription>
-                    By {post.author} on {format(new Date(post.timestamp), "MMMM d, yyyy")}
-                 </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="whitespace-pre-wrap">{post.content}</p>
-                {post.videoUrl && (
-                    <div className="mt-4">
-                        <h4 className="font-semibold mb-2">Watch Video:</h4>
-                        <Link href={post.videoUrl} target="_blank" className="text-primary hover:underline break-all">{post.videoUrl}</Link>
-                    </div>
+              <div className="flex flex-col flex-1">
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                      <div>
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <Badge variant="secondary">{post.category}</Badge>
+                            <Badge variant={post.visibility === 'Public' ? 'outline' : 'default'} className="flex items-center gap-1">
+                              {post.visibility === 'Public' ? <Globe className="h-3 w-3" /> : <Users className="h-3 w-3" />}
+                              {post.visibility}
+                            </Badge>
+                          </div>
+                          <CardTitle className="font-headline text-xl">{post.title}</CardTitle>
+                      </div>
+                      <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="icon" onClick={() => handleOpenFormDialog(post)}>
+                              <FilePenLine className="h-4 w-4" />
+                              <span className="sr-only">Edit</span>
+                          </Button>
+                          <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                                      <Trash2 className="h-4 w-4" />
+                                      <span className="sr-only">Delete</span>
+                                  </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                      This action cannot be undone. This will permanently delete this news post.
+                                  </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDeletePost(post.id)} className="bg-red-600 hover:bg-red-700">Delete</AlertDialogAction>
+                                  </AlertDialogFooter>
+                              </AlertDialogContent>
+                          </AlertDialog>
+                      </div>
+                  </div>
+                  <CardDescription>
+                      By {post.author} on {format(new Date(post.timestamp), "MMMM d, yyyy")}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex-1">
+                  <p className="whitespace-pre-wrap text-sm">{post.content}</p>
+                  {post.videoUrl && (
+                      <div className="mt-4">
+                          <h4 className="font-semibold mb-2 text-sm">Watch Video:</h4>
+                          <Link href={post.videoUrl} target="_blank" className="text-primary hover:underline break-all text-sm">{post.videoUrl}</Link>
+                      </div>
+                  )}
+                </CardContent>
+                {post.externalLink && (
+                  <>
+                      <Separator className="mt-auto"/>
+                      <CardFooter className="pt-6">
+                          <Button asChild variant="outline" size="sm">
+                            <Link href={post.externalLink} target="_blank">
+                                <LinkIcon className="h-4 w-4 mr-2" />
+                                Read More
+                            </Link>
+                          </Button>
+                      </CardFooter>
+                  </>
                 )}
-              </CardContent>
-              {post.externalLink && (
-                 <>
-                    <Separator className="my-4"/>
-                    <CardFooter>
-                        <Link href={post.externalLink} target="_blank" className="text-sm font-medium text-primary hover:underline flex items-center gap-2">
-                            <LinkIcon className="h-4 w-4" />
-                            Read More
-                        </Link>
-                    </CardFooter>
-                </>
-              )}
+              </div>
             </Card>
           )) : (
-            <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed rounded-lg">
-                <CardTitle>No News Yet</CardTitle>
-                <CardDescription className="mt-2">Click "Create Post" to share your first update.</CardDescription>
+            <div className="lg:col-span-2 xl:col-span-3">
+                <Card>
+                    <CardContent>
+                        <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed rounded-lg">
+                            <CardTitle>No News Yet</CardTitle>
+                            <CardDescription className="mt-2">Click "Create Post" to share your first update.</CardDescription>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
       <NewsPostFormDialog />
-    </>
+    </div>
   );
 }

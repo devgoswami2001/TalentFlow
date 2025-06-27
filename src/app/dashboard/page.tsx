@@ -25,6 +25,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { ApplicationTrendsChart } from '@/components/application-trends-chart';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export default function DashboardPage() {
   return (
@@ -121,9 +122,17 @@ export default function DashboardPage() {
               <TableBody>
                 <TableRow>
                   <TableCell>
-                    <div className="font-medium">Liam Johnson</div>
-                    <div className="hidden text-sm text-muted-foreground md:inline">
-                      liam@example.com
+                    <div className='flex items-center gap-3'>
+                      <Avatar>
+                          <AvatarImage src="https://placehold.co/40x40" alt="Liam Johnson" data-ai-hint="person portrait"/>
+                          <AvatarFallback>LJ</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-medium">Liam Johnson</div>
+                        <div className="hidden text-sm text-muted-foreground md:inline">
+                          liam@example.com
+                        </div>
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -135,23 +144,39 @@ export default function DashboardPage() {
                 </TableRow>
                  <TableRow>
                   <TableCell>
-                    <div className="font-medium">Olivia Smith</div>
-                    <div className="hidden text-sm text-muted-foreground md:inline">
-                      olivia@example.com
+                    <div className='flex items-center gap-3'>
+                      <Avatar>
+                          <AvatarImage src="https://placehold.co/40x40" alt="Olivia Smith" data-ai-hint="person portrait"/>
+                          <AvatarFallback>OS</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-medium">Olivia Smith</div>
+                        <div className="hidden text-sm text-muted-foreground md:inline">
+                          olivia@example.com
+                        </div>
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="font-medium">Product Manager</div>
                   </TableCell>
                   <TableCell className="text-right">
-                     <Badge>Shortlisted</Badge>
+                     <Badge variant="secondary">Shortlisted</Badge>
                   </TableCell>
                 </TableRow>
                  <TableRow>
                   <TableCell>
-                    <div className="font-medium">Noah Williams</div>
-                    <div className="hidden text-sm text-muted-foreground md:inline">
-                      noah@example.com
+                    <div className='flex items-center gap-3'>
+                      <Avatar>
+                          <AvatarImage src="https://placehold.co/40x40" alt="Noah Williams" data-ai-hint="person portrait"/>
+                          <AvatarFallback>NW</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-medium">Noah Williams</div>
+                        <div className="hidden text-sm text-muted-foreground md:inline">
+                          noah@example.com
+                        </div>
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>
@@ -163,9 +188,17 @@ export default function DashboardPage() {
                 </TableRow>
                  <TableRow>
                   <TableCell>
-                    <div className="font-medium">Emma Brown</div>
-                    <div className="hidden text-sm text-muted-foreground md:inline">
-                      emma@example.com
+                    <div className='flex items-center gap-3'>
+                      <Avatar>
+                          <AvatarImage src="https://placehold.co/40x40" alt="Emma Brown" data-ai-hint="person portrait"/>
+                          <AvatarFallback>EB</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-medium">Emma Brown</div>
+                        <div className="hidden text-sm text-muted-foreground md:inline">
+                          emma@example.com
+                        </div>
+                      </div>
                     </div>
                   </TableCell>
                   <TableCell>

@@ -53,7 +53,7 @@ export function DashboardNav() {
       >
         <Bell className="h-4 w-4" />
         Notifications
-        <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
+        <Badge className="ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full">
           3
         </Badge>
       </Link>
