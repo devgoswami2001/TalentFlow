@@ -53,6 +53,7 @@ import {
   DialogDescription
 } from "@/components/ui/dialog";
 import { JobForm } from "./job-form";
+import { useToast } from "@/hooks/use-toast";
 
 const statusBadgeVariant: { [key in Job["status"]]: "default" | "secondary" | "outline" } = {
   Active: "default",
@@ -67,6 +68,7 @@ export function JobManagement() {
   const [selectedJob, setSelectedJob] = React.useState<Job | null>(null);
   const [actionToConfirm, setActionToConfirm] = React.useState<(() => void) | null>(null);
   const [alertContent, setAlertContent] = React.useState({title: '', description: ''});
+  const { toast } = useToast();
 
 
   const handleCreateNew = () => {
@@ -81,6 +83,15 @@ export function JobManagement() {
 
   const handleStatusChange = (jobId: number, status: Job['status']) => {
     setJobs(jobs.map(j => j.id === jobId ? {...j, status} : j));
+  }
+  
+  const handleCopyLink = (jobId: number) => {
+    const link = `${window.location.origin}/jobs/${jobId}`;
+    navigator.clipboard.writeText(link);
+    toast({
+        title: "Link Copied!",
+        description: "Public link for the job has been copied to your clipboard.",
+    });
   }
 
   const handleConfirmAction = (job: Job, action: 'close' | 'duplicate') => {
@@ -167,6 +178,10 @@ export function JobManagement() {
                   <DropdownMenuContent align="end">
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuItem onSelect={() => handleEdit(job)}>Edit</DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => handleCopyLink(job.id)}>
+                        <Copy className="mr-2 h-4 w-4" />
+                        Copy Public Link
+                    </DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => handleConfirmAction(job, 'duplicate')}>Duplicate</DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onSelect={() => handleConfirmAction(job, 'close')} className="text-red-600">

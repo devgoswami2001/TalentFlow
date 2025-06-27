@@ -6,6 +6,7 @@ import {
   applicants as initialApplicants,
   jobs,
   type Applicant,
+  type Note
 } from "@/lib/data";
 import {
   Table,
@@ -65,6 +66,34 @@ export function ApplicantManagement() {
         setSelectedApplicant(prev => prev ? { ...prev, status: newStatus } : null);
     }
   };
+
+  const handleNoteAdd = (applicantId: number, noteContent: string) => {
+    const newNote: Note = {
+      id: Date.now(),
+      author: "Admin User", // In a real app, this would be the logged-in user
+      content: noteContent,
+      timestamp: new Date().toISOString(),
+    };
+
+    const updatedApplicants = applicants.map(applicant => {
+      if (applicant.id === applicantId) {
+        const updatedNotes = applicant.notes ? [...applicant.notes, newNote] : [newNote];
+        return { ...applicant, notes: updatedNotes };
+      }
+      return applicant;
+    });
+
+    setApplicants(updatedApplicants);
+
+    if (selectedApplicant?.id === applicantId) {
+      setSelectedApplicant(prev => {
+        if (!prev) return null;
+        const updatedNotes = prev.notes ? [...prev.notes, newNote] : [newNote];
+        return { ...prev, notes: updatedNotes };
+      });
+    }
+  };
+
 
   const handleSelectApplicant = (applicant: Applicant) => {
     setSelectedApplicant(applicant);
@@ -163,6 +192,7 @@ export function ApplicantManagement() {
                     applicant={selectedApplicant} 
                     jobDescription={getJobDescription(selectedApplicant.jobId)}
                     onStatusChange={handleStatusChange}
+                    onNoteAdd={handleNoteAdd}
                 />
             )}
         </SheetContent>

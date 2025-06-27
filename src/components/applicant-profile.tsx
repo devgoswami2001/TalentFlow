@@ -24,13 +24,16 @@ import { getAnalysisForApplicant } from "@/lib/actions";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Button } from "./ui/button";
-import { AlertTriangle, Briefcase, Mail, Phone, Printer, UserCircle } from "lucide-react";
+import { AlertTriangle, Briefcase, Mail, Phone, Printer, UserCircle, MessageSquare } from "lucide-react";
 import Link from "next/link";
+import { Textarea } from "./ui/textarea";
+import { formatDistanceToNow } from "date-fns";
 
 type ApplicantProfileProps = {
   applicant: Applicant;
   jobDescription: string;
   onStatusChange: (applicantId: number, newStatus: Applicant["status"]) => void;
+  onNoteAdd: (applicantId: number, noteContent: string) => void;
 };
 
 const statusOptions: Applicant["status"][] = [
@@ -46,6 +49,7 @@ export function ApplicantProfile({
   applicant,
   jobDescription,
   onStatusChange,
+  onNoteAdd,
 }: ApplicantProfileProps) {
   const [analysis, setAnalysis] = React.useState<{
     highlightedResume: string;
@@ -53,6 +57,7 @@ export function ApplicantProfile({
   } | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [newNote, setNewNote] = React.useState("");
 
   React.useEffect(() => {
     if (applicant && jobDescription) {
@@ -110,6 +115,13 @@ export function ApplicantProfile({
     }
   }
 
+  const handleAddNote = () => {
+    if (newNote.trim()) {
+        onNoteAdd(applicant.id, newNote.trim());
+        setNewNote("");
+    }
+  }
+
   return (
     <>
       <SheetHeader className="text-left flex-row gap-4 items-center space-y-0 p-6 pb-0">
@@ -138,8 +150,9 @@ export function ApplicantProfile({
       <div className="flex-1 overflow-y-auto -mr-6 pr-6">
         <Tabs defaultValue="analysis" className="mt-4">
             <div className="px-6">
-                 <TabsList className="grid w-full grid-cols-2">
+                 <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="analysis">AI Analysis</TabsTrigger>
+                    <TabsTrigger value="notes">Notes</TabsTrigger>
                     <TabsTrigger value="actions">Actions</TabsTrigger>
                 </TabsList>
             </div>
@@ -180,6 +193,41 @@ export function ApplicantProfile({
                         </div>
                     </div>
                 )}
+            </TabsContent>
+            <TabsContent value="notes" className="space-y-6 p-6">
+                <h3 className="font-semibold font-headline text-lg">Internal Notes</h3>
+                <div className="space-y-4">
+                    <div className="grid gap-4">
+                        <Textarea 
+                            placeholder="Add a note about this candidate..."
+                            value={newNote}
+                            onChange={(e) => setNewNote(e.target.value)}
+                            className="min-h-[80px]"
+                        />
+                        <Button onClick={handleAddNote} disabled={!newNote.trim()} className="w-fit">
+                            Add Note
+                        </Button>
+                    </div>
+
+                    <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                        {applicant.notes && applicant.notes.length > 0 ? (
+                            applicant.notes.sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).map(note => (
+                                <div key={note.id} className="text-sm border-l-2 pl-4 py-2">
+                                    <p className="whitespace-pre-wrap">{note.content}</p>
+                                    <p className="text-xs text-muted-foreground mt-2">
+                                        <strong>{note.author}</strong> &middot; {formatDistanceToNow(new Date(note.timestamp), { addSuffix: true })}
+                                    </p>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="flex flex-col items-center justify-center text-center p-6 border-2 border-dashed rounded-lg">
+                                <MessageSquare className="w-12 h-12 text-muted-foreground mb-2" />
+                                <h4 className="text-base font-semibold">No Notes Yet</h4>
+                                <p className="text-muted-foreground text-sm">Be the first to add a note.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </TabsContent>
             <TabsContent value="actions" className="space-y-6 p-6">
                 <h3 className="font-semibold font-headline text-lg">Candidate Management</h3>

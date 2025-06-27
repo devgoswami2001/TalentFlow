@@ -34,6 +34,13 @@ export type Job = {
     screeningQuestions: string[];
 };
 
+export type Note = {
+  id: number;
+  author: string;
+  content: string;
+  timestamp: string;
+};
+
 export type Applicant = {
   id: number;
   name: string;
@@ -46,6 +53,7 @@ export type Applicant = {
   appliedDate: string;
   resumeText: string;
   matchPercentage?: number;
+  notes?: Note[];
 };
 
 export const jobs: Job[] = [
@@ -129,7 +137,15 @@ export const applicants: Applicant[] = [
     - Focused on web performance and building scalable applications.
     - Built and maintained component libraries for design systems.
     ---
-    Skills: React, TypeScript, Next.js, Tailwind CSS, Web Performance, JavaScript, HTML, CSS`
+    Skills: React, TypeScript, Next.js, Tailwind CSS, Web Performance, JavaScript, HTML, CSS`,
+    notes: [
+      {
+        id: 1,
+        author: 'Ritika Mehra',
+        content: 'Strong technical skills in the phone screen. Seems like a great culture fit. Proceeding to technical interview.',
+        timestamp: '2025-07-16T14:30:00Z'
+      }
+    ]
   },
   {
     id: 2,
@@ -153,7 +169,8 @@ export const applicants: Applicant[] = [
     - Worked closely with engineering teams in an agile environment.
     - Strong communicator and team collaborator.
     ---
-    Skills: Product Strategy, Roadmap Planning, User Research, Agile Methodologies, JIRA, Communication`
+    Skills: Product Strategy, Roadmap Planning, User Research, Agile Methodologies, JIRA, Communication`,
+    notes: []
   },
   {
     id: 3,
@@ -163,7 +180,7 @@ export const applicants: Applicant[] = [
     avatar: 'https://placehold.co/40x40',
     jobId: 3,
     jobTitle: 'UX Designer',
-    status: 'Applied',
+    status: 'Hired',
     appliedDate: '2025-07-20T00:00:00Z',
     matchPercentage: 78,
     resumeText: `Noah Williams - UX Designer
@@ -185,7 +202,7 @@ export const applicants: Applicant[] = [
     avatar: 'https://placehold.co/40x40',
     jobId: 1,
     jobTitle: 'Senior Frontend Developer',
-    status: 'Applied',
+    status: 'Rejected',
     appliedDate: '2025-07-18T00:00:00Z',
     resumeText: `Emma Brown - Frontend Developer
     ---

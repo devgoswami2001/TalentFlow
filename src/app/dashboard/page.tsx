@@ -1,3 +1,4 @@
+
 import {
   Activity,
   ArrowUpRight,
@@ -26,8 +27,14 @@ import {
 } from '@/components/ui/table';
 import { ApplicationTrendsChart } from '@/components/application-trends-chart';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { jobs, applicants } from '@/lib/data';
 
 export default function DashboardPage() {
+  const activeJobsCount = jobs.filter(job => job.status === 'Active').length;
+  const newApplicantsCount = applicants.length;
+  const hiredThisMonthCount = applicants.filter(applicant => applicant.status === 'Hired').length;
+  const recentApplicants = applicants.slice(0, 4);
+
   return (
     <>
       <div className="flex items-center justify-between space-y-2">
@@ -40,45 +47,45 @@ export default function DashboardPage() {
             <Briefcase className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12</div>
+            <div className="text-2xl font-bold">{activeJobsCount}</div>
             <p className="text-xs text-muted-foreground">
-              +2 since last month
+              Currently open positions
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">New Applicants</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Applicants</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+2,350</div>
+            <div className="text-2xl font-bold">{newApplicantsCount}</div>
             <p className="text-xs text-muted-foreground">
-              +180.1% from last month
+              Across all job postings
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Hired This Month</CardTitle>
+            <CardTitle className="text-sm font-medium">Total Hired</CardTitle>
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+5</div>
+            <div className="text-2xl font-bold">{hiredThisMonthCount}</div>
             <p className="text-xs text-muted-foreground">
-              +1 from last month
+              Candidates successfully hired
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Now</CardTitle>
+            <CardTitle className="text-sm font-medium">Engagement</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">+573</div>
             <p className="text-xs text-muted-foreground">
-              +201 since last hour
+              +20.1% since last month
             </p>
           </CardContent>
         </Card>
@@ -120,94 +127,30 @@ export default function DashboardPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                  <TableCell>
-                    <div className='flex items-center gap-3'>
-                      <Avatar>
-                          <AvatarImage src="https://placehold.co/40x40" alt="Liam Johnson" data-ai-hint="person portrait"/>
-                          <AvatarFallback>LJ</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium">Liam Johnson</div>
-                        <div className="hidden text-sm text-muted-foreground md:inline">
-                          liam@example.com
-                        </div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="font-medium">Software Engineer</div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Badge variant="outline">Applied</Badge>
-                  </TableCell>
-                </TableRow>
-                 <TableRow>
-                  <TableCell>
-                    <div className='flex items-center gap-3'>
-                      <Avatar>
-                          <AvatarImage src="https://placehold.co/40x40" alt="Olivia Smith" data-ai-hint="person portrait"/>
-                          <AvatarFallback>OS</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium">Olivia Smith</div>
-                        <div className="hidden text-sm text-muted-foreground md:inline">
-                          olivia@example.com
-                        </div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="font-medium">Product Manager</div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                     <Badge variant="secondary">Shortlisted</Badge>
-                  </TableCell>
-                </TableRow>
-                 <TableRow>
-                  <TableCell>
-                    <div className='flex items-center gap-3'>
-                      <Avatar>
-                          <AvatarImage src="https://placehold.co/40x40" alt="Noah Williams" data-ai-hint="person portrait"/>
-                          <AvatarFallback>NW</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium">Noah Williams</div>
-                        <div className="hidden text-sm text-muted-foreground md:inline">
-                          noah@example.com
-                        </div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="font-medium">UX Designer</div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Badge variant="outline">Applied</Badge>
-                  </TableCell>
-                </TableRow>
-                 <TableRow>
-                  <TableCell>
-                    <div className='flex items-center gap-3'>
-                      <Avatar>
-                          <AvatarImage src="https://placehold.co/40x40" alt="Emma Brown" data-ai-hint="person portrait"/>
-                          <AvatarFallback>EB</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="font-medium">Emma Brown</div>
-                        <div className="hidden text-sm text-muted-foreground md:inline">
-                          emma@example.com
-                        </div>
-                      </div>
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <div className="font-medium">Data Scientist</div>
-                  </TableCell>
-                   <TableCell className="text-right">
-                     <Badge>Interview</Badge>
-                  </TableCell>
-                </TableRow>
+                {recentApplicants.map((applicant) => (
+                    <TableRow key={applicant.id}>
+                        <TableCell>
+                            <div className='flex items-center gap-3'>
+                            <Avatar>
+                                <AvatarImage src={applicant.avatar} alt={applicant.name} data-ai-hint="person portrait"/>
+                                <AvatarFallback>{applicant.name.split(" ").map(n=>n[0]).join("")}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <div className="font-medium">{applicant.name}</div>
+                                <div className="hidden text-sm text-muted-foreground md:inline">
+                                {applicant.email}
+                                </div>
+                            </div>
+                            </div>
+                        </TableCell>
+                        <TableCell>
+                            <div className="font-medium">{applicant.jobTitle}</div>
+                        </TableCell>
+                        <TableCell className="text-right">
+                            <Badge variant={applicant.status === 'Interview' ? 'default' : applicant.status === 'Shortlisted' ? 'secondary' : 'outline'}>{applicant.status}</Badge>
+                        </TableCell>
+                    </TableRow>
+                ))}
               </TableBody>
             </Table>
           </CardContent>
