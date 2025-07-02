@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { MoveRight } from 'lucide-react';
+import { Cog } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -49,7 +49,7 @@ export default function LoginPage() {
             </div>
             <Button type="submit" className="w-full group shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow" asChild>
               <Link href="/dashboard">
-                Secure Login <MoveRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform"/>
+                Secure Login <Cog className="w-4 h-4 ml-2 group-hover:animate-spin transition-transform"/>
               </Link>
             </Button>
             
@@ -80,16 +80,16 @@ export default function LoginPage() {
       <div className="hidden lg:block relative overflow-hidden group">
         <Image
           src="https://placehold.co/1200x1200"
-          alt="Futuristic abstract background"
+          alt="Abstract background of mechanical gears"
           width="1920"
           height="1080"
-          data-ai-hint="futuristic technology abstract"
+          data-ai-hint="mechanical gears industrial abstract"
           className="h-full w-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-transparent to-background/50"></div>
         <div className="absolute bottom-12 left-12 p-8 rounded-xl bg-black/50 backdrop-blur-md border border-white/10 shadow-2xl">
             <h2 className="text-4xl font-bold text-white font-headline h-12 flex items-center">
-              <TypingEffect text="AI-Powered Hiring." />
+              <TypingEffect text="Engineering Recruitment." />
               <span className="animate-pulse text-2xl ml-1">_</span>
             </h2>
             <p className="text-primary-foreground/80 mt-2 max-w-md">
