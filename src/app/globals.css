@@ -8,30 +8,30 @@ body {
 
 @layer base {
   :root {
-    --background: 224 71% 4%; /* Deep Space Blue */
-    --foreground: 210 40% 98%; /* Starlight White */
-    --card: 222 47% 11%;
-    --card-foreground: 210 40% 98%;
-    --popover: 224 71% 4%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 198 93% 60%; /* Vibrant Cyan */
-    --primary-foreground: 222 47% 11%;
-    --secondary: 217 33% 17%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217 33% 17%;
-    --muted-foreground: 215 28% 47%;
-    --accent: 280 80% 60%; /* Electric Magenta */
+    --background: 0 0% 100%;
+    --foreground: 224 71% 4%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71% 4%;
+    --primary: 198 93% 45%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 224 71% 4%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 280 80% 50%;
     --accent-foreground: 210 40% 98%;
-    --destructive: 0 63% 31%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217 33% 17%;
-    --input: 217 33% 17%;
-    --ring: 198 93% 60%;
-    --chart-1: 198 93% 60%;
-    --chart-2: 280 80% 60%;
-    --chart-3: 220 83% 63%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 198 93% 45%;
+    --chart-1: 198 93% 45%;
+    --chart-2: 280 80% 50%;
+    --chart-3: 220 83% 53%;
+    --chart-4: 43 74% 51%;
+    --chart-5: 27 87% 52%;
     --radius: 0.5rem;
   }
   .dark {
@@ -70,6 +70,6 @@ body {
     @apply bg-background text-foreground;
   }
   mark {
-      @apply bg-primary/20 text-primary-foreground rounded px-1 py-0.5;
+    @apply bg-primary/20 text-primary-foreground rounded px-1 py-0.5;
   }
 }
