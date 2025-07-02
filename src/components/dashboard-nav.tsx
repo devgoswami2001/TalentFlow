@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -12,6 +13,7 @@ import {
   AreaChart,
   Bell,
   Bot,
+  Building,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -24,6 +26,7 @@ const navItems = [
   { href: '/dashboard/team', label: 'HR Team', icon: Users },
   { href: '/dashboard/talent-pool', label: 'Talent Pool', icon: Star },
   { href: '/dashboard/reports', label: 'Reports', icon: AreaChart },
+  { href: '/company', label: 'Company Profile', icon: Building },
 ];
 
 export function DashboardNav() {
