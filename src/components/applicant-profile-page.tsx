@@ -223,14 +223,41 @@ export function ApplicantProfilePage({ applicant: initialApplicant, job, analysi
           </TabsContent>
 
           <TabsContent value="resume" className="mt-4">
-            <Card>
+             <Card>
                 <CardHeader>
                     <CardTitle>Original Resume</CardTitle>
-                    <CardDescription>The candidate's full, unedited resume text.</CardDescription>
+                    <CardDescription>The candidate's full, unedited resume, formatted for readability.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="prose prose-sm dark:prose-invert max-h-[600px] overflow-y-auto rounded-md border p-4 whitespace-pre-wrap bg-muted/50">
-                        {applicant.resumeText}
+                    <div className="max-h-[600px] overflow-y-auto rounded-md border p-6 bg-muted/50 space-y-6">
+                        {applicant.resumeText.split('---').map((section, index) => {
+                            if (section.trim() === '') return null;
+                            
+                            const lines = section.trim().split('\n').map(l => l.trim()).filter(Boolean);
+                            
+                            if (index === 0) { // Header section
+                                return (
+                                    <div key={index} className="text-center pb-4 border-b">
+                                        <h2 className="text-2xl font-bold font-headline">{lines[0]}</h2>
+                                        {lines.slice(1).map((line, subIndex) => (
+                                            <p key={subIndex} className="text-muted-foreground">{line}</p>
+                                        ))}
+                                    </div>
+                                )
+                            }
+
+                            const title = lines.shift() || 'Section';
+                            return (
+                                <div key={index}>
+                                    <h3 className="text-xl font-semibold font-headline mb-3 text-primary">{title}</h3>
+                                    <ul className="list-disc pl-5 space-y-2 text-sm">
+                                        {lines.map((line, lineIndex) => (
+                                            <li key={lineIndex} className="text-muted-foreground leading-relaxed">{line.replace(/^- /, '')}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )
+                        })}
                     </div>
                 </CardContent>
             </Card>
