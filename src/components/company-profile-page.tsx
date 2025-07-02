@@ -1,3 +1,7 @@
+
+"use client";
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { jobs, newsPosts } from '@/lib/data';
@@ -5,11 +9,24 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Icons } from '@/components/icons';
-import { Briefcase, MapPin, ArrowRight, Rss, Building, Camera, UserPlus, FilePenLine } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { 
+    Briefcase, 
+    MapPin, 
+    ArrowRight, 
+    Rss, 
+    Building, 
+    Camera, 
+    UserPlus, 
+    FilePenLine,
+    Save,
+    X 
+} from 'lucide-react';
 import { format } from 'date-fns';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-const companyInfo = {
+const initialCompanyInfo = {
   name: 'Hyresense',
   tagline: 'Pioneering the Future of Talent Acquisition',
   description: 'Hyresense is at the forefront of revolutionizing the recruitment industry. We leverage cutting-edge AI and data analytics to create intelligent, intuitive, and efficient hiring solutions. Our mission is to connect exceptional talent with innovative companies, fostering growth and success for both.',
@@ -28,6 +45,24 @@ const activeJobs = jobs.filter(job => job.status === 'Active').slice(0, 3); // S
 const latestNews = newsPosts.filter(post => post.visibility === 'Public').slice(0, 2); // Show latest 2
 
 export function CompanyProfilePage() {
+  const [isEditing, setIsEditing] = useState(false);
+  const [companyInfo, setCompanyInfo] = useState(initialCompanyInfo);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setCompanyInfo(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSave = () => {
+    // In a real app, this would trigger an API call to save the data.
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setCompanyInfo(initialCompanyInfo); // Reset changes
+    setIsEditing(false);
+  };
+
   return (
     <div className="bg-muted/40 min-h-screen">
       <div className="absolute inset-0 -z-10 h-1/3 bg-gradient-to-b from-primary/20 to-transparent"></div>
@@ -43,13 +78,32 @@ export function CompanyProfilePage() {
                 className="object-cover opacity-20"
               />
               <div className="absolute inset-0 flex items-end p-6">
-                <div className="flex items-end gap-4">
-                    <div className="w-28 h-28 rounded-full bg-background border-4 border-background shadow-lg flex items-center justify-center">
+                <div className="flex items-end gap-4 w-full">
+                    <div className="w-28 h-28 rounded-full bg-background border-4 border-background shadow-lg flex items-center justify-center shrink-0">
                         <Icons.logo className="h-16 w-16 text-primary" />
                     </div>
-                    <div>
-                        <h1 className="text-4xl font-bold font-headline text-primary-foreground shadow-sm">{companyInfo.name}</h1>
-                        <p className="text-primary-foreground/90 mt-1">{companyInfo.tagline}</p>
+                    <div className="flex-grow">
+                        {isEditing ? (
+                            <div className="space-y-1">
+                                <Input
+                                    name="name"
+                                    value={companyInfo.name}
+                                    onChange={handleInputChange}
+                                    className="text-4xl h-auto p-0 border-0 bg-transparent font-bold font-headline text-primary-foreground shadow-sm focus-visible:ring-0 focus-visible:ring-offset-0"
+                                />
+                                <Input
+                                    name="tagline"
+                                    value={companyInfo.tagline}
+                                    onChange={handleInputChange}
+                                    className="text-primary-foreground/90 h-auto p-0 border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0"
+                                />
+                            </div>
+                        ) : (
+                            <div>
+                                <h1 className="text-4xl font-bold font-headline text-primary-foreground shadow-sm">{companyInfo.name}</h1>
+                                <p className="text-primary-foreground/90 mt-1">{companyInfo.tagline}</p>
+                            </div>
+                        )}
                     </div>
                 </div>
               </div>
@@ -65,21 +119,45 @@ export function CompanyProfilePage() {
                 </TabsList>
 
                 <div className="flex items-center gap-3 shrink-0 pb-4 md:pb-0">
-                    <Button>
-                        <UserPlus className="mr-2 h-4 w-4" />
-                        Follow
-                    </Button>
-                    <Button variant="outline">
-                        <FilePenLine className="mr-2 h-4 w-4" />
-                        Edit Profile
-                    </Button>
+                    {isEditing ? (
+                        <>
+                            <Button variant="outline" onClick={handleCancel}>
+                                <X className="mr-2 h-4 w-4" />
+                                Cancel
+                            </Button>
+                            <Button onClick={handleSave}>
+                                <Save className="mr-2 h-4 w-4" />
+                                Save Changes
+                            </Button>
+                        </>
+                    ) : (
+                        <>
+                            <Button>
+                                <UserPlus className="mr-2 h-4 w-4" />
+                                Follow
+                            </Button>
+                            <Button variant="outline" onClick={() => setIsEditing(true)}>
+                                <FilePenLine className="mr-2 h-4 w-4" />
+                                Edit Profile
+                            </Button>
+                        </>
+                    )}
                 </div>
             </div>
 
             <CardContent className="p-0">
-                <TabsContent value="about" className="p-6 mt-0">
-                    <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl font-headline mb-4">Innovating Recruitment</h2>
-                    <p className="text-muted-foreground leading-relaxed">{companyInfo.longDescription}</p>
+                <TabsContent value="about" className="p-6 mt-0 space-y-4">
+                    <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl font-headline">Innovating Recruitment</h2>
+                    {isEditing ? (
+                        <Textarea
+                            name="longDescription"
+                            value={companyInfo.longDescription}
+                            onChange={handleInputChange}
+                            className="text-muted-foreground leading-relaxed min-h-[150px]"
+                        />
+                    ) : (
+                        <p className="text-muted-foreground leading-relaxed">{companyInfo.longDescription}</p>
+                    )}
                 </TabsContent>
 
                 <TabsContent value="careers" className="p-6 mt-0">
