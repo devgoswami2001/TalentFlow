@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Icons } from '@/components/icons';
-import { Briefcase, MapPin, ArrowRight, Rss, Building, Camera, Video } from 'lucide-react';
+import { Briefcase, MapPin, ArrowRight, Rss, Building, Camera } from 'lucide-react';
 import { format } from 'date-fns';
 
 const companyInfo = {
@@ -20,11 +20,7 @@ const companyInfo = {
       { src: 'https://placehold.co/800x600', alt: 'Team collaborating on a project', hint: 'team collaboration' },
       { src: 'https://placehold.co/800x600', alt: 'Company event', hint: 'company event' },
       { src: 'https://placehold.co/800x600', alt: 'Close-up of our technology dashboard', hint: 'dashboard interface' },
-    ],
-    video: {
-      src: 'https://www.youtube.com/embed/dQw4w9WgXcQ', // Placeholder video
-      title: 'A Glimpse into Life at Hyresense'
-    }
+    ]
   }
 };
 
@@ -158,24 +154,6 @@ export function CompanyProfilePage() {
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
                 </div>
             ))}
-          </div>
-          <div className="mt-16">
-            <div className="mx-auto max-w-2xl lg:mx-0">
-              <h2 className="text-base font-semibold leading-7 text-primary flex items-center gap-2"><Video className="w-5 h-5" /> Company Video</h2>
-              <p className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl font-headline">{companyInfo.gallery.video.title}</p>
-            </div>
-            <div className="mt-10 relative aspect-video w-full max-w-4xl mx-auto rounded-xl overflow-hidden shadow-2xl shadow-primary/20 border">
-                 <iframe 
-                    width="100%" 
-                    height="100%" 
-                    src={companyInfo.gallery.video.src} 
-                    title={companyInfo.gallery.video.title} 
-                    frameBorder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-                    allowFullScreen
-                    className="absolute inset-0 w-full h-full"
-                ></iframe>
-            </div>
           </div>
         </section>
       </main>
