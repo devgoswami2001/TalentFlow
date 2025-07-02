@@ -30,6 +30,26 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { ApplicantProfile } from "./applicant-profile";
 import { format } from "date-fns";
 import { Progress } from "./ui/progress";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { ChevronDown, Download, MessageSquare, XCircle, CheckCircle2 } from "lucide-react";
+
 
 const statusVariantMap: { [key in Applicant["status"]]: "default" | "secondary" | "outline" | "destructive" } = {
     Applied: 'outline',
@@ -45,6 +65,10 @@ export function ApplicantManagement() {
   const [filteredApplicants, setFilteredApplicants] = React.useState<Applicant[]>(initialApplicants);
   const [selectedJob, setSelectedJob] = React.useState("all");
   const [selectedApplicant, setSelectedApplicant] = React.useState<Applicant | null>(null);
+  const [selectedApplicantIds, setSelectedApplicantIds] = React.useState<number[]>([]);
+  const [isMessageDialogOpen, setIsMessageDialogOpen] = React.useState(false);
+  const [bulkMessage, setBulkMessage] = React.useState("");
+  const { toast } = useToast();
 
   React.useEffect(() => {
     if (selectedJob === "all") {
@@ -54,6 +78,7 @@ export function ApplicantManagement() {
         applicants.filter((applicant) => applicant.jobId === parseInt(selectedJob))
       );
     }
+    setSelectedApplicantIds([]);
   }, [selectedJob, applicants]);
 
   const handleStatusChange = (applicantId: number, newStatus: Applicant["status"]) => {
@@ -104,6 +129,72 @@ export function ApplicantManagement() {
     return job ? job.description : "";
   }
 
+  const handleSelectAll = (checked: boolean | "indeterminate") => {
+    setSelectedApplicantIds(checked ? filteredApplicants.map((a) => a.id) : []);
+  };
+
+  const handleSelectOne = (applicantId: number, checked: boolean) => {
+    setSelectedApplicantIds((prev) =>
+      checked ? [...prev, applicantId] : prev.filter((id) => id !== applicantId)
+    );
+  };
+
+  const handleBulkStatusChange = (newStatus: Applicant["status"]) => {
+    setApplicants(prevApplicants =>
+        prevApplicants.map(applicant =>
+            selectedApplicantIds.includes(applicant.id) ? { ...applicant, status: newStatus } : applicant
+        )
+    );
+    toast({
+        title: "Bulk Update Successful",
+        description: `${selectedApplicantIds.length} applicants have been updated to "${newStatus}".`,
+    });
+    setSelectedApplicantIds([]);
+  };
+
+  const handleExport = () => {
+    const selected = applicants.filter(a => selectedApplicantIds.includes(a.id));
+    const headers = ["ID", "Name", "Email", "Job Title", "Status", "Applied On", "Resume Text"];
+    const csvContent = [
+        headers.join(','),
+        ...selected.map(a => [
+            a.id,
+            `"${a.name.replace(/"/g, '""')}"`,
+            a.email,
+            `"${a.jobTitle.replace(/"/g, '""')}"`,
+            a.status,
+            a.appliedDate,
+            `"${a.resumeText.replace(/"/g, '""')}"`
+        ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", `applicants_export_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+        title: "Export Successful",
+        description: `Data for ${selected.length} applicants has been exported.`,
+    });
+    setSelectedApplicantIds([]);
+  };
+
+  const handleSendBulkMessage = () => {
+      console.log(`Sending message to ${selectedApplicantIds.length} applicants: ${bulkMessage}`);
+      toast({
+          title: "Message Sent (Simulated)",
+          description: `Your message has been sent to ${selectedApplicantIds.length} applicants.`,
+      });
+      setIsMessageDialogOpen(false);
+      setBulkMessage("");
+      setSelectedApplicantIds([]);
+  }
+
   return (
     <div className="space-y-4">
       <div className="flex items-center space-x-4">
@@ -120,12 +211,53 @@ export function ApplicantManagement() {
             ))}
           </SelectContent>
         </Select>
+        {selectedApplicantIds.length > 0 && (
+          <div className="flex items-center gap-4">
+            <span className="text-sm text-muted-foreground">{selectedApplicantIds.length} of {filteredApplicants.length} selected</span>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline">
+                  Bulk Actions <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start">
+                <DropdownMenuItem onSelect={() => handleBulkStatusChange('Shortlisted')}>
+                  <CheckCircle2 className="mr-2 h-4 w-4" />
+                  Shortlist
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => handleBulkStatusChange('Rejected')} className="text-destructive focus:text-destructive">
+                  <XCircle className="mr-2 h-4 w-4" />
+                  Reject
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={() => setIsMessageDialogOpen(true)}>
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    Send Message
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={handleExport}>
+                  <Download className="mr-2 h-4 w-4" />
+                  Export List (.csv)
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        )}
       </div>
 
       <div className="border rounded-lg">
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-[40px]">
+                 <Checkbox
+                    checked={
+                      selectedApplicantIds.length === filteredApplicants.length &&
+                      filteredApplicants.length > 0
+                    }
+                    onCheckedChange={(checked) => handleSelectAll(checked)}
+                    aria-label="Select all"
+                  />
+              </TableHead>
               <TableHead>Candidate</TableHead>
               <TableHead>Applied For</TableHead>
               <TableHead>Applied On</TableHead>
@@ -136,7 +268,14 @@ export function ApplicantManagement() {
           </TableHeader>
           <TableBody>
             {filteredApplicants.map((applicant) => (
-              <TableRow key={applicant.id}>
+              <TableRow key={applicant.id} data-state={selectedApplicantIds.includes(applicant.id) && "selected"}>
+                <TableCell>
+                   <Checkbox
+                      checked={selectedApplicantIds.includes(applicant.id)}
+                      onCheckedChange={(checked) => handleSelectOne(applicant.id, !!checked)}
+                      aria-label={`Select ${applicant.name}`}
+                    />
+                </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-3">
                     <Avatar>
@@ -197,6 +336,29 @@ export function ApplicantManagement() {
             )}
         </SheetContent>
       </Sheet>
+      
+       <Dialog open={isMessageDialogOpen} onOpenChange={setIsMessageDialogOpen}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Send Bulk Message</DialogTitle>
+                    <DialogDescription>
+                        Your message will be sent to {selectedApplicantIds.length} selected applicant(s). This is a simulation.
+                    </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                    <Textarea 
+                        placeholder="Type your message here..."
+                        value={bulkMessage}
+                        onChange={(e) => setBulkMessage(e.target.value)}
+                        className="min-h-[120px]"
+                    />
+                </div>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsMessageDialogOpen(false)}>Cancel</Button>
+                    <Button onClick={handleSendBulkMessage} disabled={!bulkMessage.trim()}>Send Message</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </div>
   );
 }
