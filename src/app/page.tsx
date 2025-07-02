@@ -6,12 +6,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Icons } from '@/components/icons';
+import { TypingEffect } from '@/components/typing-effect';
 
 export default function LoginPage() {
   return (
     <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2 bg-background">
-      <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto grid w-[400px] gap-8 z-10">
+      <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
+        <div className="absolute inset-0 -z-10 bg-gradient-to-tr from-accent/10 via-transparent to-transparent"></div>
+        <div className="mx-auto w-full max-w-md rounded-2xl border border-border/20 bg-background/60 p-8 shadow-2xl backdrop-blur-lg">
           <div className="grid gap-2 text-center">
              <div className="flex items-center justify-center gap-3 mb-4">
               <Icons.logo className="w-10 h-10" />
@@ -22,7 +24,7 @@ export default function LoginPage() {
             </p>
           </div>
 
-          <div className="grid gap-6">
+          <div className="grid gap-6 mt-8">
             <div className="grid gap-2">
               <Label htmlFor="email">Email Address</Label>
               <Input
@@ -30,7 +32,7 @@ export default function LoginPage() {
                 type="email"
                 placeholder="m@example.com"
                 required
-                className="bg-muted/50 focus:bg-background transition-colors"
+                className="bg-background/70 focus:bg-background transition-colors"
               />
             </div>
             <div className="grid gap-2">
@@ -43,9 +45,9 @@ export default function LoginPage() {
                   Forgot password?
                 </Link>
               </div>
-              <Input id="password" type="password" required className="bg-muted/50 focus:bg-background transition-colors"/>
+              <Input id="password" type="password" required className="bg-background/70 focus:bg-background transition-colors"/>
             </div>
-            <Button type="submit" className="w-full group" asChild>
+            <Button type="submit" className="w-full group shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow" asChild>
               <Link href="/dashboard">
                 Secure Login <MoveRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform"/>
               </Link>
@@ -56,18 +58,18 @@ export default function LoginPage() {
                 <span className="w-full border-t" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
+                <span className="bg-background/0 px-2 text-muted-foreground backdrop-blur-sm">
                   Or continue with
                 </span>
               </div>
             </div>
 
-            <Button variant="outline" className="w-full">
+            <Button variant="outline" className="w-full bg-background/70 hover:bg-background transition-colors">
               Login with Google
             </Button>
           </div>
 
-          <div className="mt-4 text-center text-sm">
+          <div className="mt-6 text-center text-sm">
             Don&apos;t have an account?{' '}
             <Link href="#" className="underline font-semibold text-primary">
               Request Access
@@ -84,10 +86,15 @@ export default function LoginPage() {
           data-ai-hint="futuristic technology abstract"
           className="h-full w-full object-cover transition-transform duration-500 ease-in-out group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-background/30"></div>
-        <div className="absolute bottom-8 left-8 p-6 rounded-lg bg-black/40 backdrop-blur-md border border-white/10 shadow-2xl">
-            <h2 className="text-3xl font-bold text-white font-headline">AI-Powered Hiring.</h2>
-            <p className="text-primary-foreground/80 mt-2 max-w-sm">Intelligent insights for a smarter recruitment pipeline that helps you find the best talent, faster.</p>
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/40 via-transparent to-background/50"></div>
+        <div className="absolute bottom-12 left-12 p-8 rounded-xl bg-black/50 backdrop-blur-md border border-white/10 shadow-2xl">
+            <h2 className="text-4xl font-bold text-white font-headline h-12 flex items-center">
+              <TypingEffect text="AI-Powered Hiring." />
+              <span className="animate-pulse text-2xl ml-1">_</span>
+            </h2>
+            <p className="text-primary-foreground/80 mt-2 max-w-md">
+                Intelligent insights for a smarter recruitment pipeline that helps you find the best talent, faster.
+            </p>
         </div>
       </div>
     </div>
