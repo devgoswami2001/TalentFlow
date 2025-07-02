@@ -12,8 +12,8 @@ export default function LoginPage() {
   return (
     <div className="w-full lg:grid lg:min-h-screen lg:grid-cols-2 bg-background">
       <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
-        <div className="absolute inset-0 -z-10 bg-gradient-to-tr from-primary/10 via-accent/5 to-transparent"></div>
-        <div className="mx-auto w-full max-w-md rounded-2xl border border-primary/20 bg-black/20 p-8 shadow-2xl shadow-primary/10 backdrop-blur-xl">
+        <div className="absolute inset-0 -z-10 bg-gradient-to-tr from-primary/20 via-accent/10 to-transparent"></div>
+        <div className="mx-auto w-full max-w-md rounded-2xl border border-primary/30 bg-background/50 p-8 shadow-2xl shadow-primary/20 backdrop-blur-xl">
           <div className="grid gap-2 text-center">
              <div className="flex items-center justify-center gap-3 mb-4">
               <Icons.logo className="w-10 h-10" />
@@ -32,7 +32,7 @@ export default function LoginPage() {
                 type="email"
                 placeholder="m@example.com"
                 required
-                className="bg-transparent focus:bg-black/20 transition-colors"
+                className="bg-transparent focus:bg-background/80 transition-colors"
               />
             </div>
             <div className="grid gap-2">
@@ -45,9 +45,9 @@ export default function LoginPage() {
                   Forgot passkey?
                 </Link>
               </div>
-              <Input id="password" type="password" required className="bg-transparent focus:bg-black/20 transition-colors"/>
+              <Input id="password" type="password" required className="bg-transparent focus:bg-background/80 transition-colors"/>
             </div>
-            <Button type="submit" className="w-full group shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow" asChild>
+            <Button type="submit" className="w-full group shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/50 transition-shadow" asChild>
               <Link href="/dashboard">
                 Authenticate <Fingerprint className="w-4 h-4 ml-2 group-hover:animate-pulse transition-transform"/>
               </Link>
@@ -58,14 +58,14 @@ export default function LoginPage() {
                 <span className="w-full border-t border-primary/20" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background/0 px-2 text-muted-foreground backdrop-blur-sm">
-                  Or use biometric
+                <span className="bg-background/80 px-2 text-muted-foreground backdrop-blur-sm">
+                  Or continue with
                 </span>
               </div>
             </div>
 
-            <Button variant="outline" className="w-full bg-transparent hover:bg-black/20 transition-colors">
-              Login with Google Biometrics
+            <Button variant="outline" className="w-full bg-transparent hover:bg-primary/10 hover:border-primary/30 transition-colors">
+              Login with Google
             </Button>
           </div>
 
