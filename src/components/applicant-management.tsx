@@ -64,22 +64,33 @@ export function ApplicantManagement() {
   const [applicants, setApplicants] = React.useState<Applicant[]>(initialApplicants);
   const [filteredApplicants, setFilteredApplicants] = React.useState<Applicant[]>(initialApplicants);
   const [selectedJob, setSelectedJob] = React.useState("all");
+  const [selectedLocation, setSelectedLocation] = React.useState("all");
   const [selectedApplicant, setSelectedApplicant] = React.useState<Applicant | null>(null);
   const [selectedApplicantIds, setSelectedApplicantIds] = React.useState<number[]>([]);
   const [isMessageDialogOpen, setIsMessageDialogOpen] = React.useState(false);
   const [bulkMessage, setBulkMessage] = React.useState("");
   const { toast } = useToast();
 
+  const jobLocationMap = React.useMemo(() => new Map(jobs.map(j => [j.id, j.location])), []);
+
   React.useEffect(() => {
-    if (selectedJob === "all") {
-      setFilteredApplicants(applicants);
-    } else {
-      setFilteredApplicants(
-        applicants.filter((applicant) => applicant.jobId === parseInt(selectedJob))
+    let newFilteredApplicants = applicants;
+
+    if (selectedJob !== "all") {
+      newFilteredApplicants = newFilteredApplicants.filter(
+        (applicant) => applicant.jobId === parseInt(selectedJob)
       );
     }
+    
+    if (selectedLocation !== "all") {
+        newFilteredApplicants = newFilteredApplicants.filter(
+            (applicant) => jobLocationMap.get(applicant.jobId) === selectedLocation
+        );
+    }
+
+    setFilteredApplicants(newFilteredApplicants);
     setSelectedApplicantIds([]);
-  }, [selectedJob, applicants]);
+  }, [selectedJob, selectedLocation, applicants, jobLocationMap]);
 
   const handleStatusChange = (applicantId: number, newStatus: Applicant["status"]) => {
     setApplicants(prevApplicants =>
@@ -209,6 +220,17 @@ export function ApplicantManagement() {
                 {job.title}
               </SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+        <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="Filter by location..." />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Locations</SelectItem>
+            <SelectItem value="Remote">Remote</SelectItem>
+            <SelectItem value="On-site">On-site</SelectItem>
+            <SelectItem value="Hybrid">Hybrid</SelectItem>
           </SelectContent>
         </Select>
         {selectedApplicantIds.length > 0 && (
