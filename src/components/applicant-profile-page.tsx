@@ -5,7 +5,7 @@ import * as React from "react";
 import Link from "next/link";
 import { format, formatDistanceToNow } from "date-fns";
 import { 
-    AlertTriangle, Briefcase, Calendar, Mail, MessageSquare, Phone, Printer, Sparkles
+    AlertTriangle, Briefcase, Calendar, Mail, MessageSquare, Phone, Printer, Sparkles, FileText
 } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -179,7 +179,7 @@ export function ApplicantProfilePage({ applicant: initialApplicant, job, analysi
                     </Select>
                 </div>
                 <Button variant="outline" className="w-full justify-center" onClick={handlePrint} disabled={!analysis}>
-                    <Printer className="mr-2 h-4 w-4" /> Print Resume
+                    <Printer className="mr-2 h-4 w-4" /> Print Analyzed Resume
                 </Button>
             </CardContent>
         </Card>
@@ -187,14 +187,15 @@ export function ApplicantProfilePage({ applicant: initialApplicant, job, analysi
 
       {/* Right Column */}
       <div className="lg:col-span-3 space-y-6">
-         <Tabs defaultValue="resume">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="resume"><Sparkles className="mr-2 h-4 w-4" /> AI Analysis & Resume</TabsTrigger>
+         <Tabs defaultValue="analysis">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="analysis"><Sparkles className="mr-2 h-4 w-4" /> AI Analysis</TabsTrigger>
+            <TabsTrigger value="resume"><FileText className="mr-2 h-4 w-4" /> Full Resume</TabsTrigger>
             <TabsTrigger value="notes"><MessageSquare className="mr-2 h-4 w-4" /> Notes ({applicant.notes?.length || 0})</TabsTrigger>
             <TabsTrigger value="job"><Briefcase className="mr-2 h-4 w-4" /> Job Details</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="resume" className="mt-4">
+          <TabsContent value="analysis" className="mt-4">
             <Card>
                 <CardHeader>
                     <CardTitle>Resume Analysis</CardTitle>
@@ -217,6 +218,20 @@ export function ApplicantProfilePage({ applicant: initialApplicant, job, analysi
                             <Sparkles className="mr-2 h-4 w-4 animate-pulse" /> Loading analysis...
                         </div>
                     )}
+                </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="resume" className="mt-4">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Original Resume</CardTitle>
+                    <CardDescription>The candidate's full, unedited resume text.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="prose prose-sm dark:prose-invert max-h-[600px] overflow-y-auto rounded-md border p-4 whitespace-pre-wrap bg-muted/50">
+                        {applicant.resumeText}
+                    </div>
                 </CardContent>
             </Card>
           </TabsContent>
