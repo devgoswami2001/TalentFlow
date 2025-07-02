@@ -1,31 +1,39 @@
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { UserCircle } from 'lucide-react';
+import { applicants, jobs } from "@/lib/data";
+import { notFound } from "next/navigation";
+import { getAnalysisForApplicant } from "@/lib/actions";
+import { ApplicantProfilePage } from "@/components/applicant-profile-page";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangle } from "lucide-react";
 
-export default function ApplicantDetailPage({ params }: { params: { id: string } }) {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="font-headline">Applicant Profile</CardTitle>
-        <CardDescription>
-          Full profile view for applicant ID: {params.id}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="flex flex-col items-center justify-center text-center p-10 border-2 border-dashed rounded-lg">
-          <UserCircle className="w-16 h-16 text-muted-foreground mb-4" />
-          <h3 className="text-xl font-bold">Full Profile Page</h3>
-          <p className="text-muted-foreground">
-            This page will contain the detailed information and history for the selected applicant.
-          </p>
-        </div>
-      </CardContent>
-    </Card>
-  );
+export default async function ApplicantDetailPage({ params }: { params: { id: string } }) {
+  const applicant = applicants.find(a => a.id === parseInt(params.id));
+
+  if (!applicant) {
+    notFound();
+  }
+
+  const job = jobs.find(j => j.id === applicant.jobId);
+
+  if (!job) {
+    return (
+        <Alert variant="destructive">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Error: Job not found</AlertTitle>
+            <AlertDescription>
+                The job associated with this applicant (ID: {applicant.jobId}) could not be found. It may have been deleted.
+            </AlertDescription>
+        </Alert>
+    )
+  }
+  
+  let analysisResult = null;
+  let analysisError = null;
+  try {
+      analysisResult = await getAnalysisForApplicant(applicant.resumeText, job.description);
+  } catch(e: any) {
+      analysisError = e.message || "Failed to load AI analysis.";
+  }
+  
+  return <ApplicantProfilePage applicant={applicant} job={job} analysis={analysisResult} analysisError={analysisError} />;
 }
