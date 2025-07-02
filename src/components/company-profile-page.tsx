@@ -4,10 +4,10 @@ import { jobs, newsPosts } from '@/lib/data';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Icons } from '@/components/icons';
-import { Briefcase, MapPin, ArrowRight, Rss, Building, Camera } from 'lucide-react';
+import { Briefcase, MapPin, ArrowRight, Rss, Building, Camera, UserPlus, FilePenLine } from 'lucide-react';
 import { format } from 'date-fns';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const companyInfo = {
   name: 'Hyresense',
@@ -29,145 +29,134 @@ const latestNews = newsPosts.filter(post => post.visibility === 'Public').slice(
 
 export function CompanyProfilePage() {
   return (
-    <div className="bg-background text-foreground">
-      {/* Hero Section */}
-      <div className="relative isolate overflow-hidden pt-24 pb-32 sm:pt-32 sm:pb-40">
-        <Image
-          src="https://placehold.co/1920x1080"
-          alt="Abstract futuristic background"
-          data-ai-hint="abstract futuristic"
-          fill
-          className="absolute inset-0 -z-10 h-full w-full object-cover opacity-20"
-        />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/10 via-transparent to-background"></div>
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 text-center">
-          <div className="mx-auto max-w-2xl">
-             <div className="flex items-center justify-center gap-3 mb-4">
-                <Icons.logo className="w-12 h-12 text-primary" />
-                <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline sm:text-6xl">
-                    {companyInfo.name}
-                </h1>
-            </div>
-            <p className="mt-6 text-lg leading-8 text-muted-foreground">
-              {companyInfo.tagline}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <main className="mx-auto max-w-7xl px-6 lg:px-8 py-16 sm:py-24 space-y-24">
-        {/* About Us Section */}
-        <section id="about" className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-           <div>
-              <h2 className="text-base font-semibold leading-7 text-primary flex items-center gap-2"><Building className="w-5 h-5" /> About Us</h2>
-              <p className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl font-headline">Innovating Recruitment</p>
-              <p className="mt-6 text-muted-foreground leading-relaxed">{companyInfo.longDescription}</p>
-           </div>
-           <div className="relative h-96 w-full rounded-2xl overflow-hidden shadow-2xl shadow-primary/20">
-              <Image src="https://placehold.co/800x600" alt="Our Team" data-ai-hint="diverse team" fill className="object-cover" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-           </div>
-        </section>
-
-        <Separator />
-
-        {/* Open Positions Section */}
-        <section id="careers">
-          <div className="mx-auto max-w-2xl lg:mx-0">
-            <h2 className="text-base font-semibold leading-7 text-primary flex items-center gap-2"><Briefcase className="w-5 h-5" /> Join Our Team</h2>
-            <p className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl font-headline">Open Positions</p>
-          </div>
-          <div className="mt-10 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {activeJobs.map(job => (
-              <Card key={job.id} className="flex flex-col hover:border-primary/50 hover:shadow-lg transition-all">
-                <CardHeader>
-                  <CardTitle className="font-headline text-xl">{job.title}</CardTitle>
-                  <CardDescription className="flex items-center gap-2 pt-2">
-                    <MapPin className="w-4 h-4" /> {job.location}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="flex-1">
-                  <Badge variant="secondary">{job.experienceLevel}</Badge>
-                </CardContent>
-                <CardFooter>
-                  <Button asChild className="w-full">
-                    <Link href={`/jobs/${job.id}`}>View Details <ArrowRight className="ml-2 w-4 h-4" /></Link>
-                  </Button>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
-           <div className="mt-10 text-center">
-                <Button variant="outline" asChild>
-                    <Link href="/dashboard/jobs">View All Openings</Link>
-                </Button>
-            </div>
-        </section>
-
-        <Separator />
-
-         {/* News Feed Section */}
-        <section id="news">
-          <div className="mx-auto max-w-2xl lg:mx-0">
-            <h2 className="text-base font-semibold leading-7 text-primary flex items-center gap-2"><Rss className="w-5 h-5" /> Latest News</h2>
-            <p className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl font-headline">What's Happening at Hyresense</p>
-          </div>
-          <div className="mt-10 grid grid-cols-1 gap-8 md:grid-cols-2">
-            {latestNews.map(post => (
-                 <Card key={post.id} className="overflow-hidden group">
-                    {post.imageUrl && (
-                        <div className="relative w-full aspect-video overflow-hidden">
-                            <Image
-                                src={post.imageUrl}
-                                alt={post.title}
-                                fill
-                                className="object-cover group-hover:scale-105 transition-transform duration-300"
-                                data-ai-hint="company news"
-                            />
-                        </div>
-                    )}
-                    <CardHeader>
-                         <Badge variant="outline" className="w-fit mb-2">{post.category}</Badge>
-                         <CardTitle className="font-headline text-xl">{post.title}</CardTitle>
-                         <CardDescription>{format(new Date(post.timestamp), "PPP")}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-muted-foreground line-clamp-3">{post.content}</p>
-                    </CardContent>
-                 </Card>
-            ))}
-          </div>
-        </section>
-
-        <Separator />
-
-        {/* Gallery Section */}
-        <section id="gallery">
-          <div className="mx-auto max-w-2xl lg:mx-0">
-            <h2 className="text-base font-semibold leading-7 text-primary flex items-center gap-2"><Camera className="w-5 h-5" /> Photo Gallery</h2>
-            <p className="mt-2 text-3xl font-bold tracking-tight text-foreground sm:text-4xl font-headline">A Look Inside Hyresense</p>
-          </div>
-          <div className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-4">
-            {companyInfo.gallery.images.map((image, index) => (
-                <div key={index} className="relative aspect-square rounded-lg overflow-hidden group">
-                    <Image src={image.src} alt={image.alt} data-ai-hint={image.hint} fill className="object-cover group-hover:scale-110 transition-transform duration-300"/>
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors"></div>
-                </div>
-            ))}
-          </div>
-        </section>
-      </main>
+    <div className="bg-muted/40 min-h-screen">
+      <div className="absolute inset-0 -z-10 h-1/3 bg-gradient-to-b from-primary/20 to-transparent"></div>
       
-       <footer className="border-t">
-            <div className="mx-auto max-w-7xl px-6 lg:px-8 py-12 text-center">
-                 <div className="flex items-center justify-center gap-2 font-semibold font-headline text-2xl">
-                    <Icons.logo className="h-8 w-8" />
-                    <span>Hyresense</span>
+      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        <Card className="w-full shadow-2xl shadow-primary/10 border-primary/20 overflow-hidden">
+          <div className="h-48 bg-gradient-to-r from-primary/80 to-accent/80 relative">
+             <Image
+                src="https://placehold.co/1200x400"
+                alt="Company banner"
+                data-ai-hint="abstract technology"
+                fill
+                className="object-cover opacity-20"
+              />
+              <div className="absolute inset-0 flex items-end p-6">
+                <div className="flex items-end gap-4">
+                    <div className="w-28 h-28 rounded-full bg-background border-4 border-background shadow-lg flex items-center justify-center">
+                        <Icons.logo className="h-16 w-16 text-primary" />
+                    </div>
+                    <div>
+                        <h1 className="text-4xl font-bold font-headline text-primary-foreground shadow-sm">{companyInfo.name}</h1>
+                        <p className="text-primary-foreground/90 mt-1">{companyInfo.tagline}</p>
+                    </div>
                 </div>
-                <p className="mt-4 text-sm text-muted-foreground">&copy; {new Date().getFullYear()} Hyresense. All rights reserved.</p>
-            </div>
-       </footer>
+              </div>
+          </div>
+          
+          <Tabs defaultValue="about" className="w-full">
+            <div className="px-6 pt-4 pb-0 bg-card border-b flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <TabsList>
+                    <TabsTrigger value="about"><Building className="mr-2 h-4 w-4"/> About</TabsTrigger>
+                    <TabsTrigger value="careers"><Briefcase className="mr-2 h-4 w-4"/> Careers ({activeJobs.length})</TabsTrigger>
+                    <TabsTrigger value="news"><Rss className="mr-2 h-4 w-4"/> News</TabsTrigger>
+                    <TabsTrigger value="gallery"><Camera className="mr-2 h-4 w-4"/> Gallery</TabsTrigger>
+                </TabsList>
 
+                <div className="flex items-center gap-3 shrink-0 pb-4 md:pb-0">
+                    <Button>
+                        <UserPlus className="mr-2 h-4 w-4" />
+                        Follow
+                    </Button>
+                    <Button variant="outline">
+                        <FilePenLine className="mr-2 h-4 w-4" />
+                        Edit Profile
+                    </Button>
+                </div>
+            </div>
+
+            <CardContent className="p-0">
+                <TabsContent value="about" className="p-6 mt-0">
+                    <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl font-headline mb-4">Innovating Recruitment</h2>
+                    <p className="text-muted-foreground leading-relaxed">{companyInfo.longDescription}</p>
+                </TabsContent>
+
+                <TabsContent value="careers" className="p-6 mt-0">
+                     <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl font-headline mb-4">Open Positions</h2>
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {activeJobs.map(job => (
+                        <Card key={job.id} className="flex flex-col hover:border-primary/50 hover:shadow-lg transition-all">
+                            <CardHeader>
+                            <CardTitle className="font-headline text-lg">{job.title}</CardTitle>
+                            <CardDescription className="flex items-center gap-2 pt-1">
+                                <MapPin className="w-4 h-4" /> {job.location}
+                            </CardDescription>
+                            </CardHeader>
+                            <CardContent className="flex-1">
+                            <Badge variant="secondary">{job.experienceLevel}</Badge>
+                            </CardContent>
+                            <CardFooter>
+                            <Button asChild className="w-full">
+                                <Link href={`/jobs/${job.id}`}>View Details <ArrowRight className="ml-2 w-4 h-4" /></Link>
+                            </Button>
+                            </CardFooter>
+                        </Card>
+                        ))}
+                    </div>
+                    <div className="mt-8 text-center">
+                        <Button variant="outline" asChild>
+                            <Link href="/dashboard/jobs">View All Openings</Link>
+                        </Button>
+                    </div>
+                </TabsContent>
+
+                <TabsContent value="news" className="p-6 mt-0">
+                    <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl font-headline mb-4">What's Happening at Hyresense</h2>
+                    <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
+                        {latestNews.map(post => (
+                            <Card key={post.id} className="overflow-hidden group">
+                                {post.imageUrl && (
+                                    <div className="relative w-full aspect-video overflow-hidden">
+                                        <Image
+                                            src={post.imageUrl}
+                                            alt={post.title}
+                                            fill
+                                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                                            data-ai-hint="company news"
+                                        />
+                                    </div>
+                                )}
+                                <CardHeader>
+                                    <Badge variant="outline" className="w-fit mb-2">{post.category}</Badge>
+                                    <CardTitle className="font-headline text-xl">{post.title}</CardTitle>
+                                    <CardDescription>{format(new Date(post.timestamp), "PPP")}</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-sm text-muted-foreground line-clamp-3">{post.content}</p>
+                                </CardContent>
+                            </Card>
+                        ))}
+                    </div>
+                </TabsContent>
+
+                <TabsContent value="gallery" className="p-6 mt-0">
+                     <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl font-headline mb-4">A Look Inside Hyresense</h2>
+                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {companyInfo.gallery.images.map((image, index) => (
+                            <div key={index} className="relative aspect-square rounded-lg overflow-hidden group">
+                                <Image src={image.src} alt={image.alt} data-ai-hint={image.hint} fill className="object-cover group-hover:scale-110 transition-transform duration-300"/>
+                                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                   <p className="text-white font-bold text-center p-2 bg-black/50 rounded-md text-sm">{image.alt}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </TabsContent>
+            </CardContent>
+          </Tabs>
+        </Card>
+      </main>
     </div>
   );
 }
