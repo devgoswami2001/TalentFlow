@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Menu, Search } from 'lucide-react';
 
 import { DashboardNav } from '@/components/dashboard-nav';
@@ -26,10 +27,10 @@ export default function DashboardLayout({
           <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
             <Link
               href="/dashboard"
-              className="flex items-center gap-2 font-semibold font-headline"
+              className="flex items-center gap-3 group"
             >
-              <Icons.logo className="h-6 w-6" />
-              <span>Hyresense</span>
+              <Image src="/logo.png" alt="HyreSense Logo" width={40} height={28} className="transition-transform group-hover:scale-105 duration-300" />
+              <span className="text-2xl font-bold font-headline bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary animate-gradient-shine [background-size:200%_auto] transition-all group-hover:brightness-110 duration-300">hyreSense</span>
             </Link>
           </div>
           <div className="flex-1 overflow-auto py-2">
@@ -54,10 +55,10 @@ export default function DashboardLayout({
               <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
                  <Link
                     href="/dashboard"
-                    className="flex items-center gap-2 font-semibold font-headline"
+                    className="flex items-center gap-3 group"
                   >
-                    <Icons.logo className="h-6 w-6" />
-                    <span>Hyresense</span>
+                    <Icons.logo className="h-8 w-8 transition-transform group-hover:scale-105 duration-300" />
+                    <span className="text-2xl font-bold font-headline bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary animate-gradient-shine [background-size:200%_auto] transition-all group-hover:brightness-110 duration-300">Hyresense</span>
                   </Link>
               </div>
               <nav className="grid gap-2 text-lg font-medium p-4">
