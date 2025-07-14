@@ -1,8 +1,9 @@
 
+
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import { Briefcase, MapPin, DollarSign, Calendar, ExternalLink, XCircle } from 'lucide-react';
+import { Briefcase, MapPin, DollarSign, Calendar, ExternalLink, XCircle, Globe } from 'lucide-react';
 
 import { jobs } from '@/lib/data';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -51,6 +52,7 @@ export default async function JobDetailPage({ params }: { params: { id: string }
                         <CardTitle className="text-4xl font-headline text-primary">{job.title}</CardTitle>
                         <div className="flex flex-wrap gap-x-6 gap-y-2 text-muted-foreground mt-4 text-sm">
                             <span className="flex items-center gap-2"><MapPin className="w-4 h-4" />{job.location}</span>
+                            <span className="flex items-center gap-2"><Globe className="w-4 h-4" />{job.workingMode}</span>
                             <span className="flex items-center gap-2"><Briefcase className="w-4 h-4" />{job.employmentType}</span>
                             {job.salaryMin && job.salaryMax && (
                             <span className="flex items-center gap-2"><DollarSign className="w-4 h-4" />${job.salaryMin.toLocaleString()} - ${job.salaryMax.toLocaleString()}</span>

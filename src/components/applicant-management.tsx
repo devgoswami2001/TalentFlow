@@ -64,14 +64,14 @@ export function ApplicantManagement() {
   const [applicants, setApplicants] = React.useState<Applicant[]>(initialApplicants);
   const [filteredApplicants, setFilteredApplicants] = React.useState<Applicant[]>(initialApplicants);
   const [selectedJob, setSelectedJob] = React.useState("all");
-  const [selectedLocation, setSelectedLocation] = React.useState("all");
+  const [selectedWorkingMode, setSelectedWorkingMode] = React.useState("all");
   const [selectedApplicant, setSelectedApplicant] = React.useState<Applicant | null>(null);
   const [selectedApplicantIds, setSelectedApplicantIds] = React.useState<number[]>([]);
   const [isMessageDialogOpen, setIsMessageDialogOpen] = React.useState(false);
   const [bulkMessage, setBulkMessage] = React.useState("");
   const { toast } = useToast();
 
-  const jobLocationMap = React.useMemo(() => new Map(jobs.map(j => [j.id, j.location])), []);
+  const jobWorkingModeMap = React.useMemo(() => new Map(jobs.map(j => [j.id, j.workingMode])), []);
 
   React.useEffect(() => {
     let newFilteredApplicants = applicants;
@@ -82,15 +82,15 @@ export function ApplicantManagement() {
       );
     }
     
-    if (selectedLocation !== "all") {
+    if (selectedWorkingMode !== "all") {
         newFilteredApplicants = newFilteredApplicants.filter(
-            (applicant) => jobLocationMap.get(applicant.jobId) === selectedLocation
+            (applicant) => jobWorkingModeMap.get(applicant.jobId) === selectedWorkingMode
         );
     }
 
     setFilteredApplicants(newFilteredApplicants);
     setSelectedApplicantIds([]);
-  }, [selectedJob, selectedLocation, applicants, jobLocationMap]);
+  }, [selectedJob, selectedWorkingMode, applicants, jobWorkingModeMap]);
 
   const handleStatusChange = (applicantId: number, newStatus: Applicant["status"]) => {
     setApplicants(prevApplicants =>
@@ -222,12 +222,12 @@ export function ApplicantManagement() {
             ))}
           </SelectContent>
         </Select>
-        <Select value={selectedLocation} onValueChange={setSelectedLocation}>
+        <Select value={selectedWorkingMode} onValueChange={setSelectedWorkingMode}>
           <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Filter by location..." />
+            <SelectValue placeholder="Filter by working mode..." />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Locations</SelectItem>
+            <SelectItem value="all">All Working Modes</SelectItem>
             <SelectItem value="Remote">Remote</SelectItem>
             <SelectItem value="On-site">On-site</SelectItem>
             <SelectItem value="Hybrid">Hybrid</SelectItem>

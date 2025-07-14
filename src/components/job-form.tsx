@@ -36,7 +36,8 @@ const jobFormSchema = z.object({
   description: z.string().min(50, "Description must be at least 50 characters."),
   requiredSkills: z.array(z.string()).min(1, "At least one skill is required."),
   experienceLevel: z.enum(['Entry-level', 'Mid-level', 'Senior', 'Lead', 'Internship']),
-  location: z.enum(['Remote', 'On-site', 'Hybrid']),
+  workingMode: z.enum(['Remote', 'On-site', 'Hybrid']),
+  location: z.string().min(2, "Location is required."),
   employmentType: z.enum(['Full-time', 'Part-time', 'Contract']),
   salaryMin: z.coerce.number().optional(),
   salaryMax: z.coerce.number().optional(),
@@ -60,7 +61,8 @@ export function JobForm({ job, onSubmit, onCancel }: JobFormProps) {
       description: job?.description || "",
       requiredSkills: job?.requiredSkills || [],
       experienceLevel: job?.experienceLevel || 'Mid-level',
-      location: job?.location || 'Remote',
+      workingMode: job?.workingMode || 'Remote',
+      location: job?.location || "",
       employmentType: job?.employmentType || 'Full-time',
       salaryMin: job?.salaryMin || undefined,
       salaryMax: job?.salaryMax || undefined,
@@ -147,12 +149,12 @@ export function JobForm({ job, onSubmit, onCancel }: JobFormProps) {
                     />
                 </div>
                 
-                <FormField
+                 <FormField
                     control={form.control}
-                    name="location"
+                    name="workingMode"
                     render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Location</FormLabel>
+                        <FormItem className="space-y-3">
+                        <FormLabel>Working Mode</FormLabel>
                         <FormControl>
                             <RadioGroup
                             onValueChange={field.onChange}
@@ -179,6 +181,22 @@ export function JobForm({ job, onSubmit, onCancel }: JobFormProps) {
                             </FormItem>
                             </RadioGroup>
                         </FormControl>
+                        <FormMessage />
+                        </FormItem>
+                    )}
+                />
+                 <FormField
+                    control={form.control}
+                    name="location"
+                    render={({ field }) => (
+                        <FormItem>
+                        <FormLabel>Location</FormLabel>
+                        <FormControl>
+                            <Input placeholder="e.g. San Francisco, USA" {...field} />
+                        </FormControl>
+                         <FormDescription>
+                            Enter the city and country for this role.
+                        </FormDescription>
                         <FormMessage />
                         </FormItem>
                     )}
