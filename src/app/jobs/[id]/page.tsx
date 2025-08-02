@@ -1,11 +1,12 @@
 
 
 import { notFound } from 'next/navigation';
+import Image from 'next/image';
 import Link from 'next/link';
 import { format } from 'date-fns';
-import { Briefcase, MapPin, DollarSign, Calendar, ExternalLink, XCircle, Globe } from 'lucide-react';
+import { Briefcase, MapPin, DollarSign, Calendar, ExternalLink, XCircle, Globe, AlertTriangle } from 'lucide-react';
 
-import { jobs } from '@/lib/data';
+import { getJobById } from '@/lib/actions';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,10 +15,25 @@ import { Icons } from '@/components/icons';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default async function JobDetailPage({ params }: { params: { id: string } }) {
-  const job = jobs.find(j => j.id === parseInt(params.id));
+  const { data: job, error } = await getJobById(parseInt(params.id));
 
-  if (!job) {
-    notFound();
+  if (error || !job) {
+    return (
+        <div className="container mx-auto py-10">
+            <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Error Fetching Job</AlertTitle>
+                <AlertDescription>
+                    {error || "Could not load the job posting. It may have been deleted or the link is incorrect."}
+                </AlertDescription>
+                 <div className="mt-4">
+                    <Button asChild>
+                        <Link href="/">Back to Safety</Link>
+                    </Button>
+                </div>
+            </Alert>
+        </div>
+    );
   }
 
   const PageHeader = () => (
@@ -26,7 +42,7 @@ export default async function JobDetailPage({ params }: { params: { id: string }
         href="/"
         className="flex items-center gap-2 font-semibold font-headline text-2xl"
         >
-        <Icons.logo className="h-8 w-8" />
+        <Image src="/logo.png" alt="HyreSense Logo" width={60} height={45} className="transition-transform group-hover:scale-105 duration-300" />
         <span>Hyresense</span>
         </Link>
     </header>
@@ -57,7 +73,7 @@ export default async function JobDetailPage({ params }: { params: { id: string }
                             {job.salaryMin && job.salaryMax && (
                             <span className="flex items-center gap-2"><DollarSign className="w-4 h-4" />${job.salaryMin.toLocaleString()} - ${job.salaryMax.toLocaleString()}</span>
                             )}
-                            <span className="flex items-center gap-2"><Calendar className="w-4 h-4" />Posted on {format(job.datePosted, "PPP")}</span>
+                            <span className="flex items-center gap-2"><Calendar className="w-4 h-4" />Posted on {format(new Date(job.datePosted), "PPP")}</span>
                         </div>
                     </div>
                 </div>
@@ -89,7 +105,7 @@ export default async function JobDetailPage({ params }: { params: { id: string }
                     <div>
                     <h3 className="font-headline text-xl mb-4">Screening Questions</h3>
                     <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground">
-                        {job.screeningQuestions.map((q, i) => <li key={i}>{q}</li>)}
+                        {job.screeningQuestions.map((q, i) => <li key={i}>{q.question}</li>)}
                     </ul>
                     </div>
                 </>
@@ -97,11 +113,11 @@ export default async function JobDetailPage({ params }: { params: { id: string }
 
             </CardContent>
             
-            {job.status === 'Active' ? (
+            {job.is_active ? (
                 <CardFooter className="bg-muted/30 p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div className="text-sm text-muted-foreground">
                         <p className="font-semibold text-foreground">Application Deadline</p>
-                        <p>{format(job.applicationDeadline, "PPP")}</p>
+                        <p>{format(new Date(job.applicationDeadline), "PPP")}</p>
                     </div>
                     <Button size="lg">Apply Now <ExternalLink className="ml-2 h-4 w-4" /></Button>
                 </CardFooter>

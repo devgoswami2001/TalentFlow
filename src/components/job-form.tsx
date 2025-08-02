@@ -1,10 +1,11 @@
 
 "use client";
 
-import { useForm } from "react-hook-form";
+import * as React from "react";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { format } from "date-fns";
+import { parseISO } from "date-fns";
 import {
   Form,
   FormControl,
@@ -29,34 +30,44 @@ import { DatePicker } from "@/components/ui/date-picker";
 import { TagsInput } from "@/components/ui/tags-input";
 import type { Job } from "@/lib/data";
 import { ScrollArea } from "./ui/scroll-area";
-import { Separator } from "./ui/separator";
+import { PlusCircle, Trash2 } from "lucide-react";
+import { Card, CardContent } from "./ui/card";
+
+const screeningQuestionSchema = z.object({
+  question: z.string().min(5, "Question must be at least 5 characters."),
+  type: z.enum(['text', 'boolean']),
+});
 
 const jobFormSchema = z.object({
+  id: z.number().optional(),
   title: z.string().min(5, "Title must be at least 5 characters."),
   description: z.string().min(50, "Description must be at least 50 characters."),
   requiredSkills: z.array(z.string()).min(1, "At least one skill is required."),
-  experienceLevel: z.enum(['Entry-level', 'Mid-level', 'Senior', 'Lead', 'Internship']),
+  experienceLevel: z.enum(['Entry-level', 'Mid-level', 'Senior-level', 'Lead', 'Internship']),
   workingMode: z.enum(['Remote', 'On-site', 'Hybrid']),
   location: z.string().min(2, "Location is required."),
   employmentType: z.enum(['Full-time', 'Part-time', 'Contract']),
   salaryMin: z.coerce.number().optional(),
   salaryMax: z.coerce.number().optional(),
   applicationDeadline: z.date(),
-  screeningQuestions: z.array(z.string()).optional(),
+  screeningQuestions: z.array(screeningQuestionSchema).optional(),
 });
 
 type JobFormValues = z.infer<typeof jobFormSchema>;
 
 type JobFormProps = {
   job?: Job | null;
-  onSubmit: (values: Job, status: 'Draft' | 'Active') => void;
+  onSubmit: (values: Partial<Job>, status: 'Draft' | 'Active') => Promise<void>;
   onCancel: () => void;
 };
 
 export function JobForm({ job, onSubmit, onCancel }: JobFormProps) {
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+
   const form = useForm<JobFormValues>({
     resolver: zodResolver(jobFormSchema),
     defaultValues: {
+      id: job?.id,
       title: job?.title || "",
       description: job?.description || "",
       requiredSkills: job?.requiredSkills || [],
@@ -64,23 +75,27 @@ export function JobForm({ job, onSubmit, onCancel }: JobFormProps) {
       workingMode: job?.workingMode || 'Remote',
       location: job?.location || "",
       employmentType: job?.employmentType || 'Full-time',
-      salaryMin: job?.salaryMin || undefined,
-      salaryMax: job?.salaryMax || undefined,
-      applicationDeadline: job?.applicationDeadline || new Date(),
+      salaryMin: job?.salaryMin ?? undefined,
+      salaryMax: job?.salaryMax ?? undefined,
+      applicationDeadline: job?.applicationDeadline ? (typeof job.applicationDeadline === 'string' ? parseISO(job.applicationDeadline) : job.applicationDeadline) : new Date(),
       screeningQuestions: job?.screeningQuestions || [],
     },
   });
 
-  const handleSubmit = (status: 'Draft' | 'Active') => (values: JobFormValues) => {
-    const newJobData: Job = {
-      id: job?.id || Date.now(),
-      status,
-      datePosted: job?.datePosted || new Date(),
-      ...values,
-    };
-    onSubmit(newJobData, status);
-  };
+  const { fields, append, remove } = useFieldArray({
+    control: form.control,
+    name: "screeningQuestions",
+  });
 
+  const handleFormSubmit = async (status: 'Active') => {
+    const isValid = await form.trigger();
+    if (isValid) {
+      setIsSubmitting(true);
+      await onSubmit(form.getValues(), status);
+      setIsSubmitting(false);
+    }
+  };
+  
   return (
     <Form {...form}>
       <form className="flex flex-col h-full">
@@ -139,7 +154,7 @@ export function JobForm({ job, onSubmit, onCancel }: JobFormProps) {
                                     <SelectItem value="Internship">Internship</SelectItem>
                                     <SelectItem value="Entry-level">Entry-level</SelectItem>
                                     <SelectItem value="Mid-level">Mid-level</SelectItem>
-                                    <SelectItem value="Senior">Senior</SelectItem>
+                                    <SelectItem value="Senior-level">Senior-level</SelectItem>
                                     <SelectItem value="Lead">Lead</SelectItem>
                                 </SelectContent>
                             </Select>
@@ -211,7 +226,7 @@ export function JobForm({ job, onSubmit, onCancel }: JobFormProps) {
                                 name="salaryMin"
                                 render={({ field }) => (
                                     <FormControl>
-                                        <Input type="number" placeholder="Min" {...field} />
+                                        <Input type="number" placeholder="Min" {...field} value={field.value ?? ''} />
                                     </FormControl>
                                 )}
                             />
@@ -221,7 +236,7 @@ export function JobForm({ job, onSubmit, onCancel }: JobFormProps) {
                                 name="salaryMax"
                                 render={({ field }) => (
                                     <FormControl>
-                                        <Input type="number" placeholder="Max" {...field} />
+                                        <Input type="number" placeholder="Max" {...field} value={field.value ?? ''} />
                                     </FormControl>
                                 )}
                             />
@@ -277,40 +292,83 @@ export function JobForm({ job, onSubmit, onCancel }: JobFormProps) {
                         </FormItem>
                     )}
                 />
-
-                <FormField
-                    control={form.control}
-                    name="screeningQuestions"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Screening Questions (Optional)</FormLabel>
-                        <FormControl>
-                            <Textarea
-                                placeholder="Enter one question per line..."
-                                className="min-h-[100px]"
-                                value={field.value?.join('\n') || ''}
-                                onChange={(e) => field.onChange(e.target.value.split('\n'))}
+                
+                <div>
+                  <FormLabel>Screening Questions (Optional)</FormLabel>
+                  <FormDescription className="mb-2">
+                      These questions will be asked to candidates upon application.
+                  </FormDescription>
+                  <div className="space-y-4">
+                    {fields.map((item, index) => (
+                      <Card key={item.id} className="p-4 relative">
+                        <CardContent className="p-0 grid grid-cols-1 md:grid-cols-3 gap-4">
+                           <FormField
+                              control={form.control}
+                              name={`screeningQuestions.${index}.question`}
+                              render={({ field }) => (
+                                <FormItem className="md:col-span-2">
+                                  <FormLabel>Question</FormLabel>
+                                  <FormControl>
+                                    <Input placeholder="e.g., How many years of experience...?" {...field} />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
                             />
-                        </FormControl>
-                        <FormDescription>
-                            These questions will be asked to candidates upon application.
-                        </FormDescription>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                            <FormField
+                              control={form.control}
+                              name={`screeningQuestions.${index}.type`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Type</FormLabel>
+                                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl>
+                                      <SelectTrigger>
+                                        <SelectValue placeholder="Select type" />
+                                      </SelectTrigger>
+                                    </FormControl>
+                                    <SelectContent>
+                                      <SelectItem value="text">Text</SelectItem>
+                                      <SelectItem value="boolean">Yes/No</SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
+                        </CardContent>
+                         <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="absolute top-1 right-1 h-7 w-7 text-destructive hover:text-destructive"
+                            onClick={() => remove(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span className="sr-only">Remove question</span>
+                          </Button>
+                      </Card>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => append({ question: '', type: 'text' })}
+                    >
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Add Question
+                    </Button>
+                  </div>
+                </div>
             </div>
         </ScrollArea>
         <div className="mt-auto pt-6 -mx-6 px-6 -mb-6 pb-6 bg-background border-t">
              <div className="flex justify-end gap-3">
-                <Button type="button" variant="ghost" onClick={onCancel}>
+                <Button type="button" variant="ghost" onClick={onCancel} disabled={isSubmitting}>
                     Cancel
                 </Button>
-                <Button type="button" variant="outline" onClick={form.handleSubmit(handleSubmit('Draft'))}>
-                    Save Draft
-                </Button>
-                <Button type="button" onClick={form.handleSubmit(handleSubmit('Active'))}>
-                    {job?.status === 'Active' ? 'Save Changes' : 'Post Now'}
+                <Button type="button" onClick={() => handleFormSubmit('Active')} disabled={isSubmitting}>
+                    {isSubmitting ? "Saving..." : (job?.id ? 'Save Changes' : 'Post Now')}
                 </Button>
             </div>
         </div>
