@@ -21,7 +21,7 @@ const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: Home },
   { href: '/dashboard/jobs', label: 'Post Job', icon: Briefcase },
   { href: '/dashboard/applicants', label: 'Applicants', icon: Users },
-  { href: '/dashboard/analyzer', label: 'AI Resume Analyzer', icon: Bot },
+  // { href: '/dashboard/analyzer', label: 'AI Resume Analyzer', icon: Bot },
   { href: '/dashboard/news', label: 'News Feed', icon: Newspaper },
   { href: '/dashboard/team', label: 'HR Team', icon: Users },
   // { href: '/dashboard/talent-pool', label: 'Talent Pool', icon: Star },

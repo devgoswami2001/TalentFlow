@@ -1,19 +1,19 @@
 
+
 'use client';
 
 import { Funnel, FunnelChart, LabelList, ResponsiveContainer, Tooltip } from 'recharts';
 import { applicants } from '@/lib/data';
 import { ChartContainer, ChartTooltipContent } from './ui/chart';
 
-const statusOrder = ['Applied', 'Shortlisted', 'Interview', 'Offer', 'Hired'];
+const statusOrder: ('applied' | 'shortlisted' | 'interview' | 'offer' | 'hired')[] = ['applied', 'shortlisted', 'interview', 'offer', 'hired'];
 
 const funnelData = statusOrder.map((status, index) => {
     const count = applicants.filter(a => {
-        // A candidate who is 'Hired' has also been 'Applied', 'Shortlisted', etc.
         const statusIndex = statusOrder.indexOf(a.status);
         return statusIndex >= index;
     }).length;
-    return { name: status, value: count, fill: `hsl(var(--chart-${index + 1}))` };
+    return { name: status.charAt(0).toUpperCase() + status.slice(1), value: count, fill: `hsl(var(--chart-${index + 1}))` };
 });
 
 const chartConfig = {

@@ -6,7 +6,7 @@ import * as React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { MoreHorizontal, PlusCircle, AlertTriangle, Loader2 } from "lucide-react";
+import { MoreHorizontal, PlusCircle, AlertTriangle, Loader2, User as UserIcon } from "lucide-react";
 import { type User } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import {
@@ -284,7 +284,7 @@ const mapApiToUiUser = (apiUser: any): User => {
         username: apiUser.username,
         role: apiUser.role,
         status: 'active',
-        avatar: `https://placehold.co/40x40`,
+        avatar: apiUser.avatar, // API should provide an avatar URL
         can_post_jobs: apiUser.can_post_jobs,
         can_view_applicants: apiUser.can_view_applicants,
         can_edit_profile: apiUser.can_edit_profile,
@@ -452,7 +452,9 @@ export function HRTeamManagement() {
                           <div className="flex items-center gap-3">
                               <Avatar>
                                   <AvatarImage src={user.avatar} alt={user.full_name} data-ai-hint="person portrait"/>
-                                  <AvatarFallback>{user.full_name?.split(' ').map(n => n[0]).join('') || 'U'}</AvatarFallback>
+                                  <AvatarFallback>
+                                      {user.avatar ? (user.full_name?.split(' ').map(n => n[0]).join('') || 'U') : <UserIcon className="h-5 w-5" />}
+                                  </AvatarFallback>
                               </Avatar>
                               {user.full_name}
                           </div>
@@ -513,5 +515,3 @@ export function HRTeamManagement() {
     </div>
   );
 }
-
-    

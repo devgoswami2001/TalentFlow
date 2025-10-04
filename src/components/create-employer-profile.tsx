@@ -1,4 +1,5 @@
 
+
 "use client";
 import Image from 'next/image';
 import * as React from "react";
@@ -6,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Building, Link as LinkIcon, Briefcase, FileText, Image as ImageIcon } from "lucide-react";
+import { Building, Link as LinkIcon, Briefcase, FileText, Image as ImageIcon, ListTree } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,12 +16,76 @@ import { Icons } from "@/components/icons";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+
+const CATEGORY_CHOICES = [
+  { value: "it", label: "Information Technology & Services" },
+  { value: "software", label: "Software Development" },
+  { value: "internet", label: "Internet & Web Services" },
+  { value: "telecom", label: "Telecommunications" },
+  { value: "electronics", label: "Electronics & Semiconductors" },
+  { value: "ai", label: "Artificial Intelligence / Machine Learning" },
+  { value: "finance", label: "Banking, Finance & Insurance" },
+  { value: "investment", label: "Investment Management" },
+  { value: "accounting", label: "Accounting" },
+  { value: "consulting", label: "Management Consulting" },
+  { value: "real_estate", label: "Real Estate & Property Management" },
+  { value: "healthcare", label: "Healthcare & Hospitals" },
+  { value: "pharma", label: "Pharmaceuticals" },
+  { value: "biotech", label: "Biotechnology" },
+  { value: "medical_devices", label: "Medical Devices" },
+  { value: "wellness", label: "Health, Wellness & Fitness" },
+  { value: "education", label: "Education & Training" },
+  { value: "edtech", label: "EdTech" },
+  { value: "research", label: "Research & Development" },
+  { value: "manufacturing", label: "Manufacturing" },
+  { value: "automotive", label: "Automotive" },
+  { value: "aerospace", label: "Aerospace & Defense" },
+  { value: "construction", label: "Construction & Engineering" },
+  { value: "energy", label: "Energy & Utilities" },
+  { value: "oil_gas", label: "Oil & Gas" },
+  { value: "mining", label: "Mining & Metals" },
+  { value: "chemical", label: "Chemicals" },
+  { value: "retail", label: "Retail & Wholesale" },
+  { value: "fmcg", label: "FMCG / Consumer Goods" },
+  { value: "food", label: "Food & Beverages" },
+  { value: "fashion", label: "Apparel & Fashion" },
+  { value: "luxury", label: "Luxury Goods & Jewelry" },
+  { value: "hospitality", label: "Hospitality" },
+  { value: "travel", label: "Travel & Tourism" },
+  { value: "media", label: "Media & Publishing" },
+  { value: "entertainment", label: "Entertainment & Film" },
+  { value: "sports", label: "Sports & Recreation" },
+  { value: "gaming", label: "Gaming" },
+  { value: "marketing", label: "Marketing & Advertising" },
+  { value: "design", label: "Design & Creative Services" },
+  { value: "logistics", label: "Logistics & Supply Chain" },
+  { value: "transport", label: "Transportation" },
+  { value: "shipping", label: "Shipping & Marine" },
+  { value: "aviation", label: "Aviation" },
+  { value: "agriculture", label: "Agriculture & Farming" },
+  { value: "forestry", label: "Forestry & Paper" },
+  { value: "fisheries", label: "Fisheries & Aquaculture" },
+  { value: "environment", label: "Environmental Services" },
+  { value: "renewables", label: "Renewable Energy" },
+  { value: "government", label: "Government Administration" },
+  { value: "ngo", label: "Nonprofit / NGO" },
+  { value: "defense", label: "Defense & Security" },
+  { value: "public_safety", label: "Public Safety & Law Enforcement" },
+  { value: "legal", label: "Legal Services" },
+  { value: "hr", label: "Human Resources & Staffing" },
+  { value: "ecommerce", label: "E-commerce" },
+  { value: "startup", label: "Startups" },
+  { value: "other", label: "Other" }
+];
+
 
 const profileFormSchema = z.object({
   company_name: z.string().min(2, "Company name must be at least 2 characters."),
   designation: z.string().min(2, "Designation is required."),
   description: z.string().min(10, "A brief description is required."),
   website: z.string().url("Please enter a valid website URL."),
+  category: z.string({ required_error: "Please select a category." }),
   logo: z.any().refine(files => files?.length == 1, "Logo is required.").refine(files => files?.[0]?.size <= 5000000, `Max file size is 5MB.`).refine(
     files => ["image/jpeg", "image/png", "image/webp"].includes(files?.[0]?.type),
     ".jpg, .png, and .webp files are accepted."
@@ -61,6 +126,7 @@ export function CreateEmployerProfile() {
     formData.append('designation', data.designation);
     formData.append('description', data.description);
     formData.append('website', data.website);
+    formData.append('category', data.category);
     formData.append('logo', data.logo[0]);
 
     try {
@@ -154,6 +220,31 @@ export function CreateEmployerProfile() {
                     <FormControl>
                       <Input type="url" placeholder="https://yourcompany.com" {...field} className="pl-9 bg-transparent focus:bg-background/80" />
                     </FormControl>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Company Category</FormLabel>
+                   <div className="relative">
+                     <ListTree className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="pl-9 bg-transparent focus:bg-background/80">
+                            <SelectValue placeholder="Select your industry" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {CATEGORY_CHOICES.map(category => (
+                            <SelectItem key={category.value} value={category.value}>{category.label}</SelectItem>
+                          ))}
+                        </SelectContent>
+                    </Select>
                   </div>
                   <FormMessage />
                 </FormItem>

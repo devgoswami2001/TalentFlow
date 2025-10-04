@@ -1,4 +1,5 @@
 
+
 import { CompanyProfilePage } from "@/components/company-profile-page";
 import { getCompanyProfile, getNewsPosts, getMyJobs } from "@/lib/actions";
 import { Metadata } from "next";
@@ -17,8 +18,8 @@ export default async function CompanyPage() {
 
     if (companyProfile) {
         const newsResult = await getNewsPosts();
-        if (newsResult.success && newsResult.data) {
-            newsPosts = newsResult.data.filter(p => p.visibility === 'public').slice(0, 2);
+        if (newsResult.success && newsResult.data?.results) {
+            newsPosts = newsResult.data.results.filter((p: NewsPost) => p.visibility === 'public').slice(0, 2);
         }
 
         const jobsResult = await getMyJobs();

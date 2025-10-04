@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -71,5 +72,25 @@ body {
   }
   mark {
     @apply bg-primary/20 text-primary-foreground rounded px-1 py-0.5;
+  }
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  body {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    background-color: hsl(var(--background)) !important;
+  }
+  .print-card {
+    border: 1px solid hsl(var(--border)) !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+  .print-bg-gradient {
+    background: linear-gradient(to right, hsl(var(--primary) / 0.8), hsl(var(--accent) / 0.8)) !important;
   }
 }

@@ -1,0 +1,60 @@
+{
+  "leadership": [
+    {
+      "id": 1,
+      "name": "Priya Sharma",
+      "position": "Chief Executive Officer",
+      "bio": "Priya has over 20 years of experience in the tech industry, with a passion for building innovative products and high-performing teams.",
+      "linkedin": "https://linkedin.com/in/priyasharma",
+      "image": {
+        "src": "https://picsum.photos/seed/leader1/400/400",
+        "alt": "Photo of Priya Sharma",
+        "width": 400,
+        "height": 400,
+        "hint": "woman portrait"
+      }
+    },
+    {
+      "id": 2,
+      "name": "Rohan Mehta",
+      "position": "Chief Technology Officer",
+      "bio": "Rohan is the technical visionary behind our platform, ensuring we stay at the forefront of technology and innovation.",
+      "linkedin": "https://linkedin.com/in/rohanmehta",
+      "image": {
+        "src": "https://picsum.photos/seed/leader2/400/400",
+        "alt": "Photo of Rohan Mehta",
+        "width": 400,
+        "height": 400,
+        "hint": "man portrait"
+      }
+    },
+    {
+      "id": 3,
+      "name": "Anjali Verma",
+      "position": "VP of Product",
+      "bio": "Anjali leads the product team with a user-centric approach, translating customer needs into impactful features.",
+      "linkedin": "https://linkedin.com/in/anjaliverma",
+      "image": {
+        "src": "https://picsum.photos/seed/leader3/400/400",
+        "alt": "Photo of Anjali Verma",
+        "width": 400,
+        "height": 400,
+        "hint": "woman tech"
+      }
+    },
+    {
+      "id": 4,
+      "name": "Vikram Singh",
+      "position": "Head of People & Culture",
+      "bio": "Vikram is dedicated to creating a thriving and inclusive workplace where every team member can grow and succeed.",
+      "linkedin": "https://linkedin.com/in/vikramsingh",
+      "image": {
+        "src": "https://picsum.photos/seed/leader4/400/400",
+        "alt": "Photo of Vikram Singh",
+        "width": 400,
+        "height": 400,
+        "hint": "man professional"
+      }
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 
+
 "use client";
 
 import * as React from "react";
@@ -19,7 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
-import type { Applicant, Job, Note } from "@/lib/data";
+import type { Applicant, Job } from "@/lib/data";
 
 type ApplicantProfilePageProps = {
   applicant: Applicant;
@@ -31,22 +32,22 @@ type ApplicantProfilePageProps = {
   analysisError: string | null;
 };
 
-const statusOptions: Applicant["status"][] = [
-  "Applied",
-  "Shortlisted",
-  "Interview",
-  "Offer",
-  "Hired",
-  "Rejected",
+const statusOptions: Applicant['status'][] = [
+  "applied",
+  "shortlisted",
+  "interview",
+  "offer",
+  "hired",
+  "rejected",
 ];
 
 const statusVariantMap: { [key in Applicant["status"]]: "default" | "secondary" | "outline" | "destructive" } = {
-    Applied: 'outline',
-    Shortlisted: 'secondary',
-    Interview: 'default',
-    Offer: 'default',
-    Hired: 'default',
-    Rejected: 'destructive'
+    applied: 'outline',
+    shortlisted: 'secondary',
+    interview: 'default',
+    offer: 'default',
+    hired: 'default',
+    rejected: 'destructive'
 };
 
 export function ApplicantProfilePage({ applicant: initialApplicant, job, analysis, analysisError }: ApplicantProfilePageProps) {
@@ -61,16 +62,7 @@ export function ApplicantProfilePage({ applicant: initialApplicant, job, analysi
 
   const handleNoteAdd = () => {
     if (newNote.trim()) {
-      const note: Note = {
-        id: Date.now(),
-        author: "Admin User", // In a real app, this would be the logged-in user
-        content: newNote.trim(),
-        timestamp: new Date().toISOString(),
-      };
-      setApplicant(prev => ({
-        ...prev,
-        notes: [...(prev.notes || []), note]
-      }));
+      console.log("Adding note:", newNote);
       setNewNote("");
     }
   };
@@ -96,7 +88,7 @@ export function ApplicantProfilePage({ applicant: initialApplicant, job, analysi
                     </head>
                     <body>
                         <h1>${applicant.name}</h1>
-                        <p>${applicant.email} &middot; ${applicant.phone}</p>
+                        <p>${applicant.email}</p>
                         <hr />
                         <div class="resume-content">${analysis.highlightedResume.replace(/<mark/g, '<mark style="background-color: #f1e5f9; color: #A06CD5; padding: 2px 4px; border-radius: 4px; font-weight: 500;"')}</div>
                     </body>
@@ -118,10 +110,7 @@ export function ApplicantProfilePage({ applicant: initialApplicant, job, analysi
       <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-20">
         <Card>
           <CardHeader className="items-center text-center">
-            <Avatar className="h-24 w-24 mb-2">
-              <AvatarImage src={applicant.avatar} alt={applicant.name} data-ai-hint="person portrait"/>
-              <AvatarFallback className="text-3xl">{applicant.name.split(" ").map(n => n[0]).join("")}</AvatarFallback>
-            </Avatar>
+            
             <CardTitle className="font-headline text-2xl">{applicant.name}</CardTitle>
             <Badge variant={statusVariantMap[applicant.status]}>{applicant.status}</Badge>
           </CardHeader>
@@ -133,7 +122,7 @@ export function ApplicantProfilePage({ applicant: initialApplicant, job, analysi
                 </div>
                  <div className="flex items-center gap-3">
                     <Phone className="w-4 h-4 text-muted-foreground" />
-                    <span>{applicant.phone}</span>
+                    <span>{applicant.applicant_profile.phone_number}</span>
                 </div>
                  <div className="flex items-center gap-3">
                     <Calendar className="w-4 h-4 text-muted-foreground" />
@@ -191,7 +180,7 @@ export function ApplicantProfilePage({ applicant: initialApplicant, job, analysi
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="analysis"><Sparkles className="mr-2 h-4 w-4" /> AI Analysis</TabsTrigger>
             <TabsTrigger value="resume"><FileText className="mr-2 h-4 w-4" /> Full Resume</TabsTrigger>
-            <TabsTrigger value="notes"><MessageSquare className="mr-2 h-4 w-4" /> Notes ({applicant.notes?.length || 0})</TabsTrigger>
+            <TabsTrigger value="notes"><MessageSquare className="mr-2 h-4 w-4" /> Notes</TabsTrigger>
             <TabsTrigger value="job"><Briefcase className="mr-2 h-4 w-4" /> Job Details</TabsTrigger>
           </TabsList>
           
@@ -283,28 +272,12 @@ export function ApplicantProfilePage({ applicant: initialApplicant, job, analysi
                     </div>
                     <Separator />
                     <div className="space-y-4">
-                        {(applicant.notes && applicant.notes.length > 0) ? (
-                            applicant.notes.sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).map(note => (
-                                <div key={note.id} className="flex gap-4">
-                                    <Avatar>
-                                        <AvatarImage src={`https://placehold.co/40x40`} data-ai-hint="person portrait"/>
-                                        <AvatarFallback>{note.author.split(" ").map(n=>n[0]).join("")}</AvatarFallback>
-                                    </Avatar>
-                                    <div className="text-sm border-l-2 pl-4 py-1 flex-1 bg-muted/30 rounded-r-lg">
-                                        <p className="font-semibold">{note.author}</p>
-                                        <p className="text-xs text-muted-foreground mb-2">
-                                            {formatDistanceToNow(new Date(note.timestamp), { addSuffix: true })}
-                                        </p>
-                                        <p className="whitespace-pre-wrap">{note.content}</p>
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
+                        
                             <div className="text-center p-8 text-muted-foreground border-2 border-dashed rounded-lg">
                                 <MessageSquare className="mx-auto h-8 w-8 mb-2" />
                                 No notes yet.
                             </div>
-                        )}
+                        
                     </div>
                 </CardContent>
             </Card>
@@ -331,7 +304,7 @@ export function ApplicantProfilePage({ applicant: initialApplicant, job, analysi
                             <Separator className="my-6" />
                             <h4 className="font-semibold mb-4 text-base">Screening Questions</h4>
                             <ul className="list-disc pl-5 space-y-2 text-sm text-muted-foreground">
-                                {job.screeningQuestions.map((q, i) => <li key={i}>{q}</li>)}
+                                {job.screeningQuestions.map((q, i) => <li key={i}>{q.question}</li>)}
                             </ul>
                         </>
                     )}

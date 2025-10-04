@@ -269,11 +269,11 @@ export default function RegisterPage() {
                  <Card className="w-full rounded-2xl border border-primary/30 bg-background/50 p-8 shadow-2xl shadow-primary/20 backdrop-blur-xl">
                      <CardHeader className="items-center text-center">
                         <CheckCircle className="w-16 h-16 text-green-500 mb-4" />
-                        <CardTitle className="font-headline text-2xl">Registration Request Received</CardTitle>
+                        <CardTitle className="font-headline text-2xl">Welcome to Hyresense!</CardTitle>
                      </CardHeader>
                      <CardContent>
                         <p className="text-center text-muted-foreground">
-                            Thank you for your interest in Hyresense. Your request has been submitted successfully. Our company associate will contact you shortly to complete the verification process.
+                           Your company profile has been created successfully. Please go back to the login page to continue.
                         </p>
                      </CardContent>
                      <CardFooter className="flex justify-center">

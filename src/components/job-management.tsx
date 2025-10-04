@@ -1,7 +1,9 @@
 
+
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import {
   MoreHorizontal,
   PlusCircle,
@@ -36,14 +38,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import {
   Dialog,
@@ -73,7 +75,7 @@ export function JobManagement({ initialJobs }: { initialJobs: Job[] }) {
   const [linkToCopy, setLinkToCopy] = React.useState("");
   const [selectedJob, setSelectedJob] = React.useState<Job | null>(null);
   const [actionToConfirm, setActionToConfirm] = React.useState<(() => void) | null>(null);
-  const [alertContent, setAlertContent] = React.useState({ title: '', description: '' });
+  const [alertContent, setAlertContent] = React.useState({title: '', description: ''});
   const { toast } = useToast();
 
 
@@ -81,7 +83,7 @@ export function JobManagement({ initialJobs }: { initialJobs: Job[] }) {
     setSelectedJob(null);
     setIsFormOpen(true);
   };
-
+  
   const handleEdit = (job: Job) => {
     setSelectedJob(job);
     setIsFormOpen(true);
@@ -95,82 +97,78 @@ export function JobManagement({ initialJobs }: { initialJobs: Job[] }) {
     });
     setIsFormOpen(true);
   };
-
-  const handleOpenCopyDialog = (jobId: number) => {
+  
+ const handleOpenCopyDialog = (jobId: number) => {
     const link = `${window.location.origin}/jobs/${jobId}`;
     setLinkToCopy(link);
     setIsCopyLinkOpen(true);
   };
-
+  
   const handleActualCopy = () => {
-    // Get the input element by ID
-    const linkInput = document.getElementById('link') as HTMLInputElement;
-    const linkText = linkInput?.value?.trim() || linkToCopy.trim();
-
-    // Select the text in the input itself
-    linkInput?.select();
-    linkInput?.setSelectionRange(0, linkText.length);
-
+    const tempInput = document.createElement('input');
+    tempInput.value = linkToCopy;
+    document.body.appendChild(tempInput);
+    tempInput.select();
     try {
       const successful = document.execCommand('copy');
       if (successful) {
         toast({
-          title: "Link Copied!",
-          description: "The public link has been copied to your clipboard.",
+            title: "Link Copied!",
+            description: "The public link has been copied to your clipboard.",
         });
       } else {
-        // Fallback
-        const textarea = document.createElement('textarea');
-        textarea.value = linkText;
-        textarea.style.position = 'fixed';
-        textarea.style.left = '-9999px';
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
+         toast({
+            variant: "destructive",
+            title: "Copy Failed",
+            description: "Could not copy the link. Please copy it manually.",
+        });
       }
     } catch (err) {
-      console.error('Copy failed:', err);
+       toast({
+          variant: "destructive",
+          title: "Copy Failed",
+          description: "An error occurred while copying the link.",
+      });
     }
-
+    document.body.removeChild(tempInput);
     setIsCopyLinkOpen(false);
-  };
+  }
 
-
+  
   const handleConfirmAction = (job: Job, action: 'delete' | 'close') => {
-    let title = '';
-    let description = '';
-    let onConfirm: () => Promise<void>;
+      let title = '';
+      let description = '';
+      let onConfirm: () => Promise<void>;
 
-    if (action === 'delete') {
-      title = `Are you sure you want to delete the "${job.title}" position?`;
-      description = 'This action cannot be undone. This will permanently remove the job posting.';
-      onConfirm = async () => {
-        const result = await deleteJob(job.id);
-        if (result.success) {
-          setJobs(prev => prev.filter(j => j.id !== job.id));
-          toast({ title: "Job Deleted", description: `"${job.title}" has been deleted.` });
-        } else {
-          toast({ variant: "destructive", title: "Deletion Failed", description: result.error });
-        }
-      };
-    } else { // 'close' action
-      title = `Are you sure you want to mark "${job.title}" as inactive?`;
-      description = 'This will close the job to new applicants. You can reactivate it later.';
-      onConfirm = async () => {
-        const result = await deactivateJob(job.id);
-        if (result.success) {
-          setJobs(prev => prev.map(j => j.id === job.id ? { ...j, status: 'Closed', is_active: false } : j));
-          toast({ title: "Job Deactivated", description: `"${job.title}" is now inactive.` });
-        } else {
-          toast({ variant: "destructive", title: "Deactivation Failed", description: result.error });
-        }
-      };
-    }
-
-    setAlertContent({ title, description });
-    setActionToConfirm(() => onConfirm);
-    setIsAlertOpen(true);
+      if (action === 'delete') {
+        title = `Are you sure you want to delete the "${job.title}" position?`;
+        description = 'This action cannot be undone. This will permanently remove the job posting.';
+        onConfirm = async () => {
+            const result = await deleteJob(job.id);
+            if (result.success) {
+                setJobs(prev => prev.filter(j => j.id !== job.id));
+                toast({ title: "Job Deleted", description: `"${job.title}" has been deleted.` });
+            } else {
+                toast({ variant: "destructive", title: "Deletion Failed", description: result.error });
+            }
+        };
+      } else { // 'close' action
+        title = `Are you sure you want to mark "${job.title}" as inactive?`;
+        description = 'This will close the job to new applicants. You can reactivate it later.';
+        onConfirm = async () => {
+            const result = await deactivateJob(job.id);
+            if (result.success) {
+                setJobs(prev => prev.map(j => j.id === job.id ? {...j, status: 'Closed', is_active: false} : j));
+                toast({ title: "Job Deactivated", description: `"${job.title}" is now inactive.` });
+            } else {
+                toast({ variant: "destructive", title: "Deactivation Failed", description: result.error });
+            }
+        };
+      }
+      
+      setAlertContent({ title, description });
+      setActionToConfirm(() => onConfirm);
+      setIsAlertOpen(true);
   }
 
   const handleFormSubmit = async (values: Partial<Job>, status: 'Active' | 'Draft' | 'Closed') => {
@@ -179,9 +177,9 @@ export function JobManagement({ initialJobs }: { initialJobs: Job[] }) {
     if (result.success && result.data) {
       setJobs(prev => {
         const newJob = result.data as Job;
-        if (values.id) {
-          // Find the job in the list and update it
-          return prev.map(j => j.id === values.id ? newJob : j);
+        if(values.id) {
+            // Find the job in the list and update it
+            return prev.map(j => j.id === values.id ? newJob : j);
         }
         // For new jobs, we prepend it to the list.
         return [newJob, ...prev];
@@ -203,20 +201,29 @@ export function JobManagement({ initialJobs }: { initialJobs: Job[] }) {
   };
 
   const getApplicantCount = (job: Job) => {
-    return job.applications_count ?? 0;
+    return job.applications_count ?? 0; 
   }
 
   const formatDatePosted = (date: Date | string) => {
     if (!date) return 'N/A';
     try {
-      const dateObj = typeof date === 'string' ? parseISO(date) : date;
+        // Attempt to parse ISO string first, then other formats
+        let dateObj = new Date(date);
+        if (isNaN(dateObj.getTime())) {
+            // If parsing as ISO fails, try parsing with format "Month Day, Year"
+            dateObj = new Date(date); // new Date() can often handle "September 07, 2025"
+        }
+        
+        if (isNaN(dateObj.getTime())) {
+            return "Invalid date";
+        }
       return formatDistanceToNow(dateObj, { addSuffix: true });
     } catch (error) {
       console.error("Failed to format date:", date, error);
-      return "Invalid date";
+      return "N/A";
     }
   }
-
+  
   return (
     <div className="space-y-6">
       <Card>
@@ -246,8 +253,8 @@ export function JobManagement({ initialJobs }: { initialJobs: Job[] }) {
                 <div className="space-y-1.5 flex-1 min-w-0">
                   <CardTitle className="font-headline text-lg truncate">{job.title}</CardTitle>
                   <CardDescription className="flex items-center gap-4">
-                    <span className="flex items-center gap-1.5"><Briefcase className="w-3.5 h-3.5" />{job.workingMode}</span>
-                    <span className="flex items-center gap-1.5 truncate"><MapPin className="w-3.5 h-3.5" />{job.location}</span>
+                     <span className="flex items-center gap-1.5"><Briefcase className="w-3.5 h-3.5" />{job.workingMode}</span>
+                     <span className="flex items-center gap-1.5 truncate"><MapPin className="w-3.5 h-3.5" />{job.location}</span>
                   </CardDescription>
                 </div>
                 <DropdownMenu>
@@ -260,17 +267,17 @@ export function JobManagement({ initialJobs }: { initialJobs: Job[] }) {
                     <DropdownMenuLabel>Actions</DropdownMenuLabel>
                     <DropdownMenuItem onSelect={() => handleEdit(job)}>Edit</DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => handleCopyJob(job)}>
-                      <CopyPlus className="mr-2 h-4 w-4" />
-                      Copy Post
+                        <CopyPlus className="mr-2 h-4 w-4" />
+                        Copy Post
                     </DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => handleOpenCopyDialog(job.id)}>
-                      <Share2 className="mr-2 h-4 w-4" />
-                      Copy Public Link
+                        <Share2 className="mr-2 h-4 w-4" />
+                        Copy Public Link
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onSelect={() => handleConfirmAction(job, 'close')} disabled={job.status === 'Closed'}>
-                      <FileX className="mr-2 h-4 w-4" />
-                      Mark as Inactive
+                     <DropdownMenuItem onSelect={() => handleConfirmAction(job, 'close')} disabled={job.status === 'Closed'}>
+                        <FileX className="mr-2 h-4 w-4" />
+                        Mark as Inactive
                     </DropdownMenuItem>
                     <DropdownMenuItem onSelect={() => handleConfirmAction(job, 'delete')} className="text-destructive focus:text-destructive">
                       <Trash2 className="mr-2 h-4 w-4" />
@@ -281,18 +288,22 @@ export function JobManagement({ initialJobs }: { initialJobs: Job[] }) {
               </div>
             </CardHeader>
             <CardContent className="flex-1 space-y-4">
-              <Badge variant={job.is_active ? 'default' : 'outline'}>{job.is_active ? 'Active' : 'Closed'}</Badge>
-              <div className="text-sm text-muted-foreground line-clamp-3">{job.description}</div>
+               <Badge variant={job.is_active ? 'default' : 'outline'}>{job.is_active ? 'Active' : 'Closed'}</Badge>
+               <div className="text-sm text-muted-foreground line-clamp-3">{job.description}</div>
             </CardContent>
-            <CardFooter className="flex justify-between text-xs text-muted-foreground pt-4 border-t">
-              <div className="flex items-center gap-1.5">
-                <Users className="w-3 h-3" />
-                <span>{getApplicantCount(job)} Applicants</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Calendar className="w-3 h-3" />
-                <span>Posted {formatDatePosted(job.datePosted)}</span>
-              </div>
+            <CardFooter className="flex justify-between items-center pt-4 border-t">
+                <div className="text-xs text-muted-foreground">
+                    <p className="flex items-center gap-1.5">
+                        <Calendar className="w-3 h-3" />
+                        Posted {formatDatePosted(job.datePosted)}
+                    </p>
+                </div>
+                 <Button asChild variant="secondary" size="sm">
+                    <Link href={`/dashboard/applicants?jobId=${job.id}`}>
+                        <Users className="mr-2 h-4 w-4" />
+                        Show Applicants ({getApplicantCount(job)})
+                    </Link>
+                 </Button>
             </CardFooter>
           </Card>
         ))}
@@ -308,64 +319,64 @@ export function JobManagement({ initialJobs }: { initialJobs: Job[] }) {
           </DialogHeader>
           <div className="flex-1 min-h-0 px-6">
             <JobForm
-              job={selectedJob}
-              onSubmit={handleFormSubmit}
-              onCancel={() => setIsFormOpen(false)}
+                job={selectedJob}
+                onSubmit={handleFormSubmit}
+                onCancel={() => setIsFormOpen(false)}
             />
           </div>
         </DialogContent>
       </Dialog>
-
-      <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>{alertContent.title}</AlertDialogTitle>
-            <AlertDialogDescription>
-              {alertContent.description}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setActionToConfirm(null)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={() => {
-              if (actionToConfirm) actionToConfirm();
-              setIsAlertOpen(false);
-              setActionToConfirm(null);
-            }}>Confirm</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <Dialog open={isCopyLinkOpen} onOpenChange={setIsCopyLinkOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Share Job Link</DialogTitle>
-            <DialogDescription>
-              Anyone with this link will be able to view the public job posting.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex items-center space-x-2">
-            <div className="grid flex-1 gap-2">
-              <Label htmlFor="link" className="sr-only">
-                Link
-              </Label>
-              <Input
-                id="link"
-                defaultValue={linkToCopy}
-                readOnly
-              />
-            </div>
-            <Button type="button" size="sm" className="px-3" onClick={handleActualCopy}>
-              <span className="sr-only">Copy</span>
-              <Copy className="h-4 w-4" />
-            </Button>
-          </div>
-          <DialogFooter className="sm:justify-start">
-            <Button type="button" variant="secondary" onClick={() => setIsCopyLinkOpen(false)}>
-              Close
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      
+       <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                <AlertDialogTitle>{alertContent.title}</AlertDialogTitle>
+                <AlertDialogDescription>
+                   {alertContent.description}
+                </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setActionToConfirm(null)}>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => {
+                    if(actionToConfirm) actionToConfirm();
+                    setIsAlertOpen(false);
+                    setActionToConfirm(null);
+                }}>Confirm</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+       </AlertDialog>
+       
+       <Dialog open={isCopyLinkOpen} onOpenChange={setIsCopyLinkOpen}>
+            <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                <DialogTitle>Share Job Link</DialogTitle>
+                <DialogDescription>
+                    Anyone with this link will be able to view the public job posting.
+                </DialogDescription>
+                </DialogHeader>
+                <div className="flex items-center space-x-2">
+                <div className="grid flex-1 gap-2">
+                    <Label htmlFor="link" className="sr-only">
+                    Link
+                    </Label>
+                    <Input
+                    id="link"
+                    defaultValue={linkToCopy}
+                    readOnly
+                    />
+                </div>
+                <Button type="button" size="sm" className="px-3" onClick={handleActualCopy}>
+                    <span className="sr-only">Copy</span>
+                    <Copy className="h-4 w-4" />
+                </Button>
+                </div>
+                <DialogFooter className="sm:justify-start">
+                    <Button type="button" variant="secondary" onClick={() => setIsCopyLinkOpen(false)}>
+                        Close
+                    </Button>
+                </DialogFooter>
+            </DialogContent>
+       </Dialog>
     </div>
   );
 }

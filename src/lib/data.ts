@@ -8,7 +8,7 @@ export type User = {
   full_name: string;
   role: string;
   status: 'active' | 'inactive'; // Derived from is_active if available
-  avatar: string; // Mocked
+  avatar: string;
   can_post_jobs: boolean;
   can_view_applicants: boolean;
   can_edit_profile: boolean;
@@ -39,30 +39,78 @@ export type Job = {
     datePosted: Date | string; // maps to created_at
     screeningQuestions: ScreeningQuestion[];
     applications_count?: number; 
+    companyName?: string;
+    companyLogo?: string;
 };
 
-
-export type Note = {
-  id: number;
-  author: string;
-  content: string;
-  timestamp: string;
+export type ApplicantProfileData = {
+    id: string;
+    full_name: string;
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone_number: string;
+    city: string;
+    country: string;
+    headline: string;
+    summary: string;
 };
+
+export type AIRemarks = {
+    fit_score: string;
+    fit_level: string;
+    remarks: string;
+    overall_recommendation: string;
+    skills_match_score: string;
+    experience_match_score: string;
+    education_match_score: string;
+    location_match_score: string;
+    confidence_score: string;
+    strengths: string[];
+    weaknesses: string[];
+    missing_skills: string[];
+    matching_skills: string[];
+    recommendations: string[];
+};
+
+export type ApplicantStatus = 
+    | 'applied'
+    | 'under_review'
+    | 'shortlisted'
+    | 'interview_scheduled'
+    | 'offer_made'
+    | 'hired'
+    | 'rejected';
+
 
 export type Applicant = {
   id: number;
-  name: string;
+  status: ApplicantStatus;
+  applied_at: string;
+  cover_letter: string;
+  resume: string; // URL
+  applicant_profile: ApplicantProfileData;
+  ai_remarks: AIRemarks;
+  // Kept for backward compatibility in other components, but will be populated from new structure
+  name: string; 
   email: string;
-  phone: string;
   avatar: string;
   jobId: number;
   jobTitle: string;
-  status: 'Applied' | 'Shortlisted' | 'Interview' | 'Offer' | 'Hired' | 'Rejected';
   appliedDate: string;
   resumeText: string;
   matchPercentage?: number;
-  notes?: Note[];
 };
+
+
+export type LeadershipMember = {
+    id: number;
+    name: string;
+    position: string;
+    bio: string;
+    linkedin: string;
+    photo_url: string;
+}
 
 export type CompanyProfile = {
   id: number;
@@ -75,7 +123,29 @@ export type CompanyProfile = {
   active_jobs_count: number;
   total_applications_count: number;
   followers_count: number;
+  user_permissions: {
+      can_edit_profile: boolean;
+  };
+  company_stats: {
+    total_jobs: number;
+    active_jobs: number;
+    total_hr_members: number;
+    last_job_posted: string | null;
+  };
+  leadership_team: LeadershipMember[];
 };
+
+export type PostComment = {
+    id: number;
+    post: number;
+    user: string;
+    user_email: string;
+    parent: number | null;
+    comment: string;
+    likes_count: number;
+    replies_count: number;
+    created_at: string;
+}
 
 
 // This mock data is no longer used by the JobManagement component but is kept for other parts of the app.
@@ -147,123 +217,8 @@ export const jobs: Job[] = [
     }
 ];
 
-export const applicants: Applicant[] = [
-  {
-    id: 1,
-    name: 'Liam Johnson',
-    email: 'liam@example.com',
-    phone: '123-456-7890',
-    avatar: 'https://placehold.co/40x40',
-    jobId: 1,
-    jobTitle: 'Senior Frontend Developer',
-    status: 'Interview',
-    appliedDate: '2025-07-15T00:00:00Z',
-    matchPercentage: 92,
-    resumeText: `Liam Johnson - Senior Frontend Developer
-    ---
-    Experience:
-    - 5+ years of experience in frontend development.
-    - Proficient in React, TypeScript, and Next.js.
-    - Extensive experience with Tailwind CSS for rapid UI development.
-    - Focused on web performance and building scalable applications.
-    - Built and maintained component libraries for design systems.
-    ---
-    Skills: React, TypeScript, Next.js, Tailwind CSS, Web Performance, JavaScript, HTML, CSS`,
-    notes: [
-      {
-        id: 1,
-        author: 'Ritika Mehra',
-        content: 'Strong technical skills in the phone screen. Seems like a great culture fit. Proceeding to technical interview.',
-        timestamp: '2025-07-16T14:30:00Z'
-      }
-    ]
-  },
-  {
-    id: 2,
-    name: 'Olivia Smith',
-    email: 'olivia@example.com',
-    phone: '123-456-7891',
-    avatar: 'https://placehold.co/40x40',
-    jobId: 2,
-    jobTitle: 'Product Manager',
-    status: 'Shortlisted',
-    appliedDate: '2025-07-12T00:00:00Z',
-    matchPercentage: 85,
-    resumeText: `Olivia Smith - Product Manager
-    ---
-    Summary:
-    A data-driven Product Manager with a knack for user-centric design.
-    ---
-    Experience:
-    - Led product strategy and roadmap planning for B2B SaaS products.
-    - Conducted extensive user research to validate hypotheses.
-    - Worked closely with engineering teams in an agile environment.
-    - Strong communicator and team collaborator.
-    ---
-    Skills: Product Strategy, Roadmap Planning, User Research, Agile Methodologies, JIRA, Communication`,
-    notes: []
-  },
-  {
-    id: 3,
-    name: 'Noah Williams',
-    email: 'noah@example.com',
-    phone: '123-456-7892',
-    avatar: 'https://placehold.co/40x40',
-    jobId: 3,
-    jobTitle: 'UX Designer',
-    status: 'Hired',
-    appliedDate: '2025-07-20T00:00:00Z',
-    matchPercentage: 78,
-    resumeText: `Noah Williams - UX Designer
-    ---
-    Portfolio: noahwilliams.design
-    ---
-    Experience:
-    - Designed user flows and wireframes for mobile and web applications.
-    - Created high-fidelity prototypes using Figma and Sketch.
-    - Collaborated with product and engineering teams to deliver intuitive user interfaces.
-    ---
-    Skills: Figma, Prototyping, User-Centered Design, Wireframing, User Flows, Collaboration`
-  },
-  {
-    id: 4,
-    name: 'Emma Brown',
-    email: 'emma@example.com',
-    phone: '123-456-7893',
-    avatar: 'https://placehold.co/40x40',
-    jobId: 1,
-    jobTitle: 'Senior Frontend Developer',
-    status: 'Rejected',
-    appliedDate: '2025-07-18T00:00:00Z',
-    resumeText: `Emma Brown - Frontend Developer
-    ---
-    Experience:
-    - 3 years of experience with React and JavaScript.
-    - Some experience with TypeScript.
-    - Built responsive websites using CSS and HTML.
-    ---
-    Skills: React, JavaScript, HTML, CSS`
-  },
-  {
-    id: 5,
-    name: 'James Wilson',
-    email: 'james@example.com',
-    phone: '123-456-7894',
-    avatar: 'https://placehold.co/40x40',
-    jobId: 1,
-    jobTitle: 'Senior Frontend Developer',
-    status: 'Applied',
-    appliedDate: '2025-07-22T00:00:00Z',
-    resumeText: `James Wilson - Frontend Engineer
-    ---
-    Experience:
-    - Developed and maintained responsive web applications using React and Redux.
-    - Collaborated with designers to implement UI features.
-    ---
-    Skills: React, Redux, JavaScript, HTML, CSS, Git`
-  }
-];
-
+export const applicants: Applicant[] = [];
+    
 export type NewsPost = {
   id: number;
   title: string;
@@ -274,33 +229,184 @@ export type NewsPost = {
   created_at: string;
   updated_at: string;
   company_name: string;
+  author_avatar?: string;
   category: "Hiring Announcements" | "Company Culture" | "Industry News" | "Job Fairs / Events";
   visibility: "public" | "internal";
+  likes_count: number;
+  comments_count: number;
+  liked_users_preview: string[];
+  comments: PostComment[];
+};
+
+export type Note = {
+    id: number;
+    application: number;
+    reviewer: string;
+    reviewer_name: string;
+    reviewer_email: string;
+    remark: string;
+    created_at: string;
+    updated_at: string;
 };
 
 
-export const newsPosts: NewsPost[] = [
-    {
-        id: 1,
-        title: "We're excited to announce our new funding round!",
-        content: "We have successfully closed a new funding round, which will help us accelerate our growth and continue to build the future of recruitment. We're grateful to our investors and our amazing team for making this possible. This new capital will be used to expand our engineering team, invest in new AI capabilities, and grow our market presence.",
-        image: "https://placehold.co/800x450",
-        created_at: "2025-07-28T10:00:00Z",
-        updated_at: "2025-07-28T10:00:00Z",
-        category: "Company Culture",
-        visibility: "public",
-        company_name: "Hyresense"
-    },
-    {
-        id: 2,
-        title: "Meet the new members of our team",
-        content: "We're thrilled to welcome three new members to the Hyresense family! Say hello to Alice (Product), Bob (Engineering), and Charlie (Marketing). They bring a wealth of experience and new perspectives to our team. We're excited to see the amazing things they'll accomplish.",
-        image: "https://placehold.co/800x450",
-        created_at: "2025-07-25T09:00:00Z",
-        updated_at: "2025-07-25T09:00:00Z",
-        category: "Hiring Announcements",
-        visibility: "internal",
-        company_name: "Hyresense"
-    },
-];
+// Progress Report Data Types
+export type AIAnalysisData = {
+    id: string;
+    is_fit: boolean;
+    fit_score: string;
+    fit_level: string;
+    remarks: string;
+    skills_match_score: string;
+    experience_match_score: string;
+    education_match_score: string;
+    location_match_score: string;
+    analysis_status: string;
+    ai_model_version: string;
+    confidence_score: string;
+    strengths: string[];
+    weaknesses: string[];
+    missing_skills: string[];
+    matching_skills: string[];
+    recommendations: string[];
+    interview_recommendation: boolean;
+    suggested_interview_questions: string[];
+    potential_concerns: any[];
+    salary_expectation_alignment: string;
+    analysis_duration_seconds: number;
+    error_message: string;
+    created_at: string;
+    updated_at: string;
+    analyzed_at: string;
+    reviewed_by_human: boolean;
+    human_override: boolean;
+    human_remarks: string;
+    overall_recommendation: string;
+    score_breakdown: {
+        overall_fit: number;
+        skills_match: number;
+        experience_match: number;
+        education_match: number;
+        location_match: number;
+        confidence: number;
+    };
+};
+
+export type EducationData = {
+    degree: string;
+    field_of_study: string;
+    institution: string;
+    start_date: string;
+    end_date: string;
+    cgpa: string;
+};
+
+export type WorkExperienceData = {
+    job_title: string;
+    company: string;
+    location: string;
+    start_date: string;
+    end_date: string;
+    responsibilities: string[];
+};
+
+export type SkillsData = {
+    technical: string[];
+};
+
+export type CertificationData = {
+    certification: string;
+    year: number;
+};
+
+export type ProjectData = {
+    project_name: string;
+    description: string;
+};
+
+export type ResumeData = {
+    id: string;
+    title: string;
+    is_default: boolean;
+    is_active: boolean;
+    experience_level: string;
+    total_experience_years: number;
+    total_experience_months: number;
+    total_experience_display: string;
+    current_company: string;
+    current_designation: string;
+    current_salary: number;
+    notice_period: string;
+    education_data: EducationData[];
+    work_experience_data: WorkExperienceData[];
+    skills_data: SkillsData;
+    certifications_data: CertificationData[];
+    projects_data: ProjectData[];
+    languages_data: any[];
+    achievements_data: string[];
+    resume_pdf: string;
+    resume_doc: null;
+    cover_letter: null;
+    view_count: number;
+    download_count: number;
+    completion_percentage: number;
+    keywords: string[];
+    created_at: string;
+    updated_at: string;
+    last_accessed: null;
+};
+
+export type ProfileData = {
+    id: string;
+    full_name: string;
+    first_name: string;
+    last_name: string;
+    date_of_birth: string;
+    gender: string;
+    phone_number: string;
+    address_line_1: string;
+    city: string;
+    state: string;
+    country: string;
+    postal_code: string;
+    headline: string;
+    summary: string;
+    job_status: string;
+    preferred_job_types: any[];
+    preferred_locations: any[];
+    expected_salary: null;
+    willing_to_relocate: boolean;
+    profile_picture: string;
+    linkedin_url: string;
+    portfolio_url: string;
+    profile_visibility: boolean;
+    allow_recruiter_contact: boolean;
+    preferred_roles: any[];
+    dream_companies: any[];
+    created_at: string;
+    updated_at: string;
+};
+
+export type ApplicationData = {
+    id: number;
+    status: string;
+    is_fit: boolean;
+    fit_score: number;
+    remarks: null;
+    cover_letter: string;
+    description: string;
+    applied_at: string;
+    reviewed_at: string;
+    applicant_email: string;
+    reviewed_by_email: string;
+};
+
+export type ProgressReportData = {
+    ai_analysis: AIAnalysisData;
+    resume: ResumeData;
+    profile: ProfileData;
+    application: ApplicationData;
+    remarks: any[];
+};
+
     

@@ -1,7 +1,7 @@
 import Link from 'next/link';
-import Image from 'next/image';
 import { Menu, Search } from 'lucide-react';
-
+import { cookies } from 'next/headers';
+import Image from 'next/image';
 import { DashboardNav } from '@/components/dashboard-nav';
 import { Icons } from '@/components/icons';
 import { Button } from '@/components/ui/button';
@@ -14,12 +14,62 @@ import {
 import { UserNav } from '@/components/user-nav';
 import { ThemeToggle } from '@/components/theme-toggle';
 
+type User = {
+  name: string;
+  email: string;
+  logo_url: string;
+  initials: string;
+};
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get('accessToken')?.value;
+  let user: User | null = null;
+
+  if (accessToken) {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/employer/me/`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+          cache: 'no-store',
+        }
+      );
+      if (response.ok) {
+        const data = await response.json();
+
+        const name = data.company_name || 'HR Admin';
+        const initials = name
+          .split(' ')
+          .map((n: string) => n[0])
+          .join('')
+          .substring(0, 2)
+          .toUpperCase();
+
+        user = {
+          name: name,
+          email: data.user_email || '', // fallback
+          logo_url: data.company_logo || '', // ✅ take logo from API
+          initials: initials,
+        };
+      }
+    } catch (error) {
+      console.error('Failed to fetch user data:', error);
+      // user remains null if API call fails
+    }
+  }
+
+  const defaultUser: User = {
+    name: 'HR Admin',
+    email: '',
+    logo_url: '',
+    initials: 'HR',
+  };
+
   return (
     <div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
       <div className="hidden border-r bg-muted/40 md:block">
@@ -30,7 +80,9 @@ export default function DashboardLayout({
               className="flex items-center gap-3 group"
             >
               <Image src="/logo.png" alt="HyreSense Logo" width={40} height={28} className="transition-transform group-hover:scale-105 duration-300" />
-              <span className="text-2xl font-bold font-headline bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary animate-gradient-shine [background-size:200%_auto] transition-all group-hover:brightness-110 duration-300">hyreSense</span>
+              <span className="text-2xl font-bold font-headline bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary animate-gradient-shine [background-size:200%_auto] transition-all group-hover:brightness-110 duration-300">
+                hyreSense
+              </span>
             </Link>
           </div>
           <div className="flex-1 overflow-auto py-2">
@@ -53,13 +105,15 @@ export default function DashboardLayout({
             </SheetTrigger>
             <SheetContent side="left" className="flex flex-col p-0">
               <div className="flex h-14 items-center border-b px-4 lg:h-[60px] lg:px-6">
-                 <Link
-                    href="/dashboard"
-                    className="flex items-center gap-3 group"
-                  >
-                    <Icons.logo className="h-8 w-8 transition-transform group-hover:scale-105 duration-300" />
-                    <span className="text-2xl font-bold font-headline bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary animate-gradient-shine [background-size:200%_auto] transition-all group-hover:brightness-110 duration-300">Hyresense</span>
-                  </Link>
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-3 group"
+                >
+                  <Icons.logo className="h-8 w-8 transition-transform group-hover:scale-105 duration-300" />
+                  <span className="text-2xl font-bold font-headline bg-clip-text text-transparent bg-gradient-to-r from-primary via-accent to-primary animate-gradient-shine [background-size:200%_auto] transition-all group-hover:brightness-110 duration-300">
+                    Hyresense
+                  </span>
+                </Link>
               </div>
               <nav className="grid gap-2 text-lg font-medium p-4">
                 <DashboardNav />
@@ -67,19 +121,9 @@ export default function DashboardLayout({
             </SheetContent>
           </Sheet>
           <div className="w-full flex-1">
-            <form>
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Search applicants, jobs..."
-                  className="w-full appearance-none bg-background pl-8 shadow-none md:w-2/3 lg:w-1/3"
-                />
-              </div>
-            </form>
           </div>
           <ThemeToggle />
-          <UserNav />
+          <UserNav user={user || defaultUser} />
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-muted/20">
           {children}
