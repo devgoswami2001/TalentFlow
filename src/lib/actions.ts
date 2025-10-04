@@ -568,23 +568,22 @@ export async function createHrUser(formData: z.infer<typeof hrUserFormSchema>): 
     return { success: false, message: "Not authenticated" };
   }
 
-  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/hr-users/`;
-
-  const apiPayload = {
-    user: {
-      email: formData.email,
-      password: formData.password,
-      first_name: formData.first_name,
-      username: formData.email,
-      last_name: formData.last_name,
-    },
-    role: formData.role,
-    can_post_jobs: formData.can_post_jobs,
-    can_view_applicants: formData.can_view_applicants,
-    can_edit_profile: formData.can_edit_profile,
-    can_post_feed: formData.can_post_feed,
-    can_manage_team: formData.can_manage_team,
-  };
+    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/hr-users/`;
+    
+    const apiPayload = {
+        user: {
+            email: formData.email,
+            password: formData.password,
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+        },
+        role: formData.role,
+        can_post_jobs: formData.can_post_jobs,
+        can_view_applicants: formData.can_view_applicants,
+        can_edit_profile: formData.can_edit_profile,
+        can_post_feed: formData.can_post_feed,
+        can_manage_team: formData.can_manage_team,
+    };
 
   try {
     const response = await fetch(url, {
@@ -1148,7 +1147,7 @@ export async function deleteApplicantNote(remarkId: number) {
 }
 
 export async function getApplicantProgressReport(applicationId: string): Promise<{ data: ProgressReportData | null; error: string | null }> {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken')?.value;
 
     if (!accessToken) {
