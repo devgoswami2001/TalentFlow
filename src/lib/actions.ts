@@ -575,6 +575,7 @@ export async function createHrUser(formData: z.infer<typeof hrUserFormSchema>): 
             email: formData.email,
             password: formData.password,
             first_name: formData.first_name,
+            username: formData.email,
             last_name: formData.last_name,
         },
         role: formData.role,
