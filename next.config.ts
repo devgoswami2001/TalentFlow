@@ -1,8 +1,6 @@
-
-import type {NextConfig} from 'next';
+import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
-  /* config options here */
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -26,6 +24,13 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'picsum.photos',
+      },
+      {
+        // ✅ ADD THIS ENTRY
+        protocol: 'https',
+        hostname: 'backend.hyresense.com',
+        port: '',
+        pathname: '/media/**',
       }
     ],
     dangerouslyAllowSVG: true,
