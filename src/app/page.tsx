@@ -89,7 +89,7 @@ export default function LoginPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, role: 'employer' }),
       });
 
       if (!response.ok) {
