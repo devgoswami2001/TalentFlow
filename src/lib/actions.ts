@@ -1,3 +1,4 @@
+
 "use server";
 
 import { analyzeResume } from "@/ai/flows/resume-analyzer";
@@ -82,21 +83,21 @@ export async function getAnalysisForApplicant(
 
 // -------- Employer Dashboard --------
 
-export async function getDashboardPageData() {
+export async function getDashboardPageData(accessToken?: string) {
   const cookieStore = await cookies();
-  const accessToken = cookieStore.get("accessToken")?.value;
+  const token = accessToken || cookieStore.get("accessToken")?.value;
 
-  if (!accessToken) {
+  if (!token) {
     return {
       stats: null,
-      monthlyData: [],
+      trends: null,
       error: "User is not authenticated. Please log in again.",
     };
   }
 
   try {
     const headers = {
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     };
 
@@ -120,20 +121,18 @@ export async function getDashboardPageData() {
       const errorData = await statsResponse.json();
       throw new Error(errorData.detail || `Failed to fetch dashboard stats: ${statsResponse.statusText}`);
     }
-    const stats = await statsResponse.json();
-
-    const monthlyData: any[] = [];
+    const result = await statsResponse.json();
 
     return {
-      stats,
-      monthlyData,
+      stats: result,
+      trends: result.trends,
       error: null,
     };
   } catch (error: any) {
     console.error("Dashboard Page Error:", error.message);
     return {
       stats: null,
-      monthlyData: [],
+      trends: null,
       error: error.message,
     };
   }
@@ -1177,4 +1176,3 @@ export async function getApplicantProgressReport(applicationId: string): Promise
         return { data: null, error: "Failed to load applicant progress report." };
     }
 }
-

@@ -6,8 +6,15 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Icons } from "@/components/icons";
 
-export default async function ProgressReportPage({ params }: { params: { id: string } }) {
-  const { data, error } = await getApplicantProgressReport(params.id);
+export default async function ProgressReportPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  // ✅ Next.js 15: params is a Promise, must await
+  const { id } = await params;
+
+  const { data, error } = await getApplicantProgressReport(id);
 
   if (error || !data) {
     return (
@@ -23,7 +30,8 @@ export default async function ProgressReportPage({ params }: { params: { id: str
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Error Loading Report</AlertTitle>
           <AlertDescription>
-            {error || "Could not load the applicant's progress report. Please try again later."}
+            {error ||
+              "Could not load the applicant's progress report. Please try again later."}
           </AlertDescription>
           <div className="mt-4">
             <Button asChild variant="secondary">

@@ -8,6 +8,8 @@ import {
   ChartLegendContent,
 } from '@/components/ui/chart';
 
+// The backend doesn't provide this data yet, so we'll keep it static for now.
+// Once the API is updated, we can pass this data in as props.
 const chartData = [
   { source: 'LinkedIn', value: 275, fill: 'var(--color-linkedin)' },
   { source: 'Indeed', value: 200, fill: 'var(--color-indeed)' },

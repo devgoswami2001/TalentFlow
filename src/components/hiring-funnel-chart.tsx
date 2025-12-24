@@ -3,18 +3,17 @@
 'use client';
 
 import { Funnel, FunnelChart, LabelList, ResponsiveContainer, Tooltip } from 'recharts';
-import { applicants } from '@/lib/data';
 import { ChartContainer, ChartTooltipContent } from './ui/chart';
 
-const statusOrder: ('applied' | 'shortlisted' | 'interview' | 'offer' | 'hired')[] = ['applied', 'shortlisted', 'interview', 'offer', 'hired'];
+type FunnelDataPoint = {
+  name: string;
+  value: number;
+  fill: string;
+};
 
-const funnelData = statusOrder.map((status, index) => {
-    const count = applicants.filter(a => {
-        const statusIndex = statusOrder.indexOf(a.status);
-        return statusIndex >= index;
-    }).length;
-    return { name: status.charAt(0).toUpperCase() + status.slice(1), value: count, fill: `hsl(var(--chart-${index + 1}))` };
-});
+type HiringFunnelChartProps = {
+  data: FunnelDataPoint[];
+};
 
 const chartConfig = {
     value: {
@@ -28,7 +27,7 @@ const chartConfig = {
 } as const;
 
 
-export function HiringFunnelChart() {
+export function HiringFunnelChart({ data }: HiringFunnelChartProps) {
   return (
     <ChartContainer config={chartConfig} className="h-[350px] w-full">
         <ResponsiveContainer width="100%" height="100%">
@@ -38,7 +37,7 @@ export function HiringFunnelChart() {
                 />
                 <Funnel
                     dataKey="value"
-                    data={funnelData}
+                    data={data}
                     isAnimationActive
                     lastShapeType="rectangle"
                 >
