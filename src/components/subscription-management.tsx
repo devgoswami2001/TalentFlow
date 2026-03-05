@@ -25,31 +25,20 @@ export function SubscriptionManagement({ plans }: SubscriptionManagementProps) {
       const result = await initiatePayUPayment(planId);
       
       if (result.success && result.data) {
-        const payU = result.data;
+        // Response structure: { payu_url: "...", payu_data: { ... } }
+        const { payu_url, payu_data } = result.data;
         
         // Programmatically create and submit PayU form
         const form = document.createElement('form');
         form.method = 'POST';
-        form.action = payU.action;
+        form.action = payu_url;
 
-        const params: Record<string, string> = {
-          key: payU.key,
-          txnid: payU.txnid,
-          amount: payU.amount,
-          productinfo: payU.productinfo,
-          firstname: payU.firstname,
-          email: payU.email,
-          phone: payU.phone,
-          surl: payU.surl,
-          furl: payU.furl,
-          hash: payU.hash,
-        };
-
-        for (const key in params) {
+        // Add all fields from payu_data as hidden inputs
+        for (const key in payu_data) {
           const input = document.createElement('input');
           input.type = 'hidden';
           input.name = key;
-          input.value = params[key];
+          input.value = payu_data[key];
           form.appendChild(input);
         }
 

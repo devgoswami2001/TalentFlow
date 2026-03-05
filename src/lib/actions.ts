@@ -49,7 +49,7 @@ export async function getSubscriptionPlans(): Promise<{ success: boolean; data?:
 
 // -------- PayU Integration --------
 
-export async function initiatePayUPayment(planId: number): Promise<{ success: boolean; data?: PayUData; error?: string }> {
+export async function initiatePayUPayment(planId: number): Promise<{ success: boolean; data?: any; error?: string }> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("accessToken")?.value;
 
@@ -57,58 +57,31 @@ export async function initiatePayUPayment(planId: number): Promise<{ success: bo
     return { success: false, error: "Not authenticated" };
   }
 
-  // 1. Fetch user details for PayU form
-  let user;
+  // Use the specific initiate-payment endpoint provided
+  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/subscriptions/initiate-payment/`;
+
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/employer/me/`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ plan_id: planId }),
     });
-    if (response.ok) {
-      user = await response.json();
+
+    const result = await tryJson(response);
+
+    if (!response.ok) {
+      throw new Error(result.detail || result.message || `Failed to initiate payment (Status: ${response.status})`);
     }
-  } catch (e) {
-    console.error("Failed to fetch user for payment:", e);
+
+    // Backend returns { payu_url: "...", payu_data: { key, txnid, hash, etc... } }
+    return { success: true, data: result };
+  } catch (error: any) {
+    console.error("Initiate Payment Error:", error);
+    return { success: false, error: error.message };
   }
-
-  if (!user) return { success: false, error: "Could not retrieve user info." };
-
-  // 2. Fetch Plan price
-  const { data: plans } = await getSubscriptionPlans();
-  const plan = plans?.find(p => p.id === planId);
-  if (!plan) return { success: false, error: "Invalid plan selected." };
-
-  // 3. Prepare PayU parameters
-  const merchantKey = process.env.PAYU_MERCHANT_KEY || 'poYVYx';
-  const salt = process.env.PAYU_SALT || 'jTg2IsD07SJ5iEEd2RwV1q7LWxQktwZv';
-  const txnid = `txn_${Date.now()}`;
-  const amount = parseFloat(plan.price).toString();
-  const productinfo = plan.name;
-  const firstname = user.company_name || 'HR Admin';
-  const email = user.user_email || 'test@example.com';
-  const phone = user.phone_number || '9999999999';
-  
-  const surl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9003'}/dashboard/subscription/success`;
-  const furl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9003'}/dashboard/subscription/failure`;
-
-  // 4. Generate Hash
-  const hashString = `${merchantKey}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|||||||||||${salt}`;
-  const hash = crypto.createHash('sha512').update(hashString).digest('hex');
-
-  const payUData: PayUData = {
-    key: merchantKey,
-    txnid,
-    amount,
-    productinfo,
-    firstname,
-    email,
-    phone,
-    surl,
-    furl,
-    hash,
-    action: process.env.NODE_ENV === 'production' ? 'https://secure.payu.in/_payment' : 'https://test.payu.in/_payment',
-  };
-
-  return { success: true, data: payUData };
 }
 
 // -------- Resume Analysis --------
