@@ -23,41 +23,33 @@ async function tryJson(response: Response) {
 // -------- Subscription Plans --------
 
 export async function getSubscriptionPlans(): Promise<{ success: boolean; data?: SubscriptionPlan[]; error?: string }> {
-  // In a real app, you'd fetch this from your DB or a billing service (Stripe/PayU product list)
-  const plans: SubscriptionPlan[] = [
-    {
-      id: 'plan_free',
-      name: 'Starter',
-      price: 0,
-      currency: 'INR',
-      interval: 'month',
-      features: ['Up to 3 Active Jobs', 'Standard Resume Analysis', 'Basic Chat Support', '1 Team Member'],
-    },
-    {
-      id: 'plan_pro',
-      name: 'Professional',
-      price: 4999,
-      currency: 'INR',
-      interval: 'month',
-      features: ['Unlimited Active Jobs', 'Advanced AI Fit Scoring', 'Priority Chat & Video', '5 Team Members', 'Custom Brand Profile'],
-      isPopular: true,
-    },
-    {
-      id: 'plan_enterprise',
-      name: 'Enterprise',
-      price: 14999,
-      currency: 'INR',
-      interval: 'month',
-      features: ['Everything in Pro', 'Custom AI Model Training', 'Dedicated Account Manager', 'Unlimited Team Members', 'API Access'],
-    }
-  ];
+  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/subscriptions/plans/`;
+  
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
 
-  return { success: true, data: plans };
+    if (!response.ok) {
+      const errorData = await tryJson(response);
+      throw new Error(errorData.detail || `Failed to fetch subscription plans (Status: ${response.status})`);
+    }
+
+    const result = await response.json();
+    return { success: true, data: (result.results || []) as SubscriptionPlan[] };
+  } catch (error: any) {
+    console.error("Get Subscription Plans Error:", error);
+    return { success: false, error: error.message };
+  }
 }
 
 // -------- PayU Integration --------
 
-export async function initiatePayUPayment(planId: string): Promise<{ success: boolean; data?: PayUData; error?: string }> {
+export async function initiatePayUPayment(planId: number): Promise<{ success: boolean; data?: PayUData; error?: string }> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get("accessToken")?.value;
 
@@ -86,21 +78,19 @@ export async function initiatePayUPayment(planId: string): Promise<{ success: bo
   if (!plan) return { success: false, error: "Invalid plan selected." };
 
   // 3. Prepare PayU parameters
-  const merchantKey = process.env.PAYU_MERCHANT_KEY || 'GTK38V'; // Use placeholder or env
-  const salt = process.env.PAYU_MERCHANT_SALT || 'eCwVEv7v'; // Use placeholder or env
+  const merchantKey = process.env.PAYU_MERCHANT_KEY || 'GTK38V';
+  const salt = process.env.PAYU_MERCHANT_SALT || 'eCwVEv7v';
   const txnid = `txn_${Date.now()}`;
-  const amount = plan.price.toString();
+  const amount = parseFloat(plan.price).toString();
   const productinfo = plan.name;
   const firstname = user.company_name || 'HR Admin';
   const email = user.user_email || 'test@example.com';
   const phone = user.phone_number || '9999999999';
   
-  // PayU URLs (Replace with your actual site domain in production)
   const surl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9003'}/dashboard/subscription/success`;
   const furl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9003'}/dashboard/subscription/failure`;
 
-  // 4. Generate Hash (Server-side only for security)
-  // sha512(key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5||||||salt)
+  // 4. Generate Hash
   const hashString = `${merchantKey}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|||||||||||${salt}`;
   const hash = crypto.createHash('sha512').update(hashString).digest('hex');
 
@@ -1171,7 +1161,7 @@ export async function getApplicantNotes(applicationId: number) {
     try {
         const response = await fetch(url, {
             method: 'GET',
-            headers: { 'Authorization': `Bearer ${token}`, },
+            headers: { 'Authorization': `Bearer ${accessToken}`, },
             cache: 'no-store',
         });
 

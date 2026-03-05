@@ -16,13 +16,18 @@ export type User = {
 };
 
 export type SubscriptionPlan = {
-  id: string;
+  id: number;
   name: string;
-  price: number;
-  currency: string;
-  interval: 'month' | 'year';
-  features: string[];
-  isPopular?: boolean;
+  plan_type: string;
+  price: string;
+  duration_days: number;
+  one_time_setup_fee: string;
+  free_hr_logins: number;
+  extra_hr_login_price: string;
+  is_active: boolean;
+  created_at: string;
+  features?: string[]; // Derived for UI display
+  isPopular?: boolean; // UI indicator
 };
 
 export type PayUData = {
