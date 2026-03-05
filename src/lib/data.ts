@@ -156,6 +156,8 @@ export type ChatMessage = {
     sender_name: string;
     sender_role: 'employer' | 'job_seeker';
     content: string;
+    file_url?: string;
+    file_name?: string;
     created_at: string;
 };
 

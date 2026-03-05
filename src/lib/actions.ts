@@ -1212,7 +1212,7 @@ export async function getChatMessages(applicationId: number) {
     }
 }
 
-export async function sendChatMessage(applicationId: number, content: string) {
+export async function sendChatMessage(applicationId: number, formData: FormData) {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken')?.value;
 
@@ -1227,9 +1227,8 @@ export async function sendChatMessage(applicationId: number, content: string) {
             method: 'POST',
             headers: { 
                 'Authorization': `Bearer ${accessToken}`,
-                'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ content: content }),
+            body: formData,
         });
 
         if (!response.ok) {

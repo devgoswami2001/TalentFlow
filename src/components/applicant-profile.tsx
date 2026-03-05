@@ -23,7 +23,7 @@ import type { Applicant, Note, ApplicantStatus, ChatMessage } from "@/lib/data";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Button } from "./ui/button";
-import { AlertTriangle, Briefcase, Mail, Phone, Printer, UserCircle, MessageSquare, CheckCircle, Star, ThumbsUp, ThumbsDown, XCircle, Lightbulb, Trash2, Send, Loader2, FileText, MessageCircle } from "lucide-react";
+import { AlertTriangle, Briefcase, Mail, Phone, Printer, UserCircle, MessageSquare, CheckCircle, Star, ThumbsUp, ThumbsDown, XCircle, Lightbulb, Trash2, Send, Loader2, FileText, MessageCircle, Paperclip, X, Download } from "lucide-react";
 import Link from "next/link";
 import { Textarea } from "./ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
@@ -76,6 +76,8 @@ export function ApplicantProfile({
   const [isChatLoading, setIsChatLoading] = React.useState(false);
   const [isMessageSubmitting, setIsMessageSubmitting] = React.useState(false);
   const [chatMessage, setChatMessage] = React.useState("");
+  const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
   const analysis = React.useMemo(() => {
@@ -138,12 +140,21 @@ export function ApplicantProfile({
   };
 
   const handleSendMessage = async () => {
-    if (!chatMessage.trim()) return;
+    if (!chatMessage.trim() && !selectedFile) return;
     setIsMessageSubmitting(true);
-    const result = await sendChatMessage(applicant.id, chatMessage.trim());
+    
+    const formData = new FormData();
+    formData.append("content", chatMessage.trim());
+    if (selectedFile) {
+        formData.append("file", selectedFile);
+    }
+
+    const result = await sendChatMessage(applicant.id, formData);
     if (result.success && result.data) {
         setMessages(prev => [...prev, result.data!]);
         setChatMessage("");
+        setSelectedFile(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
     } else {
         toast({
             variant: "destructive",
@@ -167,6 +178,17 @@ export function ApplicantProfile({
         });
     }
   }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+        setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  const removeSelectedFile = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
 
   // Scroll to bottom of chat when new messages arrive
   React.useEffect(() => {
@@ -445,7 +467,18 @@ export function ApplicantProfile({
                                                 ? "bg-primary text-primary-foreground rounded-tr-none" 
                                                 : "bg-muted rounded-tl-none"
                                         )}>
-                                            <p className="whitespace-pre-wrap">{msg.content}</p>
+                                            {msg.content && <p className="whitespace-pre-wrap">{msg.content}</p>}
+                                            {msg.file_url && (
+                                                <div className={cn("flex items-center gap-2 mt-2 p-2 rounded-md", msg.sender_role === 'employer' ? "bg-primary-foreground/10" : "bg-background/50")}>
+                                                    <FileText className="h-4 w-4 shrink-0" />
+                                                    <span className="text-xs truncate max-w-[150px]">{msg.file_name || 'Attachment'}</span>
+                                                    <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto" asChild>
+                                                        <a href={msg.file_url} target="_blank" rel="noopener noreferrer" download>
+                                                            <Download className="h-3 w-3" />
+                                                        </a>
+                                                    </Button>
+                                                </div>
+                                            )}
                                         </div>
                                         <span className="text-[10px] text-muted-foreground mt-1 px-1">
                                             {format(new Date(msg.created_at), "p")}
@@ -467,7 +500,31 @@ export function ApplicantProfile({
                     </ScrollArea>
 
                     <div className="p-4 border-t bg-background">
+                        {selectedFile && (
+                            <div className="flex items-center gap-2 mb-3 p-2 bg-muted rounded-md text-sm">
+                                <Paperclip className="h-4 w-4 text-primary" />
+                                <span className="flex-1 truncate">{selectedFile.name}</span>
+                                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={removeSelectedFile}>
+                                    <X className="h-4 w-4" />
+                                </Button>
+                            </div>
+                        )}
                         <div className="flex gap-2">
+                            <input
+                                type="file"
+                                className="hidden"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                            />
+                            <Button 
+                                variant="outline" 
+                                size="icon" 
+                                className="shrink-0 h-[44px] w-[44px]"
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={isMessageSubmitting}
+                            >
+                                <Paperclip className="h-5 w-5" />
+                            </Button>
                             <Textarea 
                                 placeholder="Type a message..."
                                 value={chatMessage}
@@ -483,7 +540,7 @@ export function ApplicantProfile({
                             <Button 
                                 size="icon" 
                                 onClick={handleSendMessage} 
-                                disabled={!chatMessage.trim() || isMessageSubmitting}
+                                disabled={(!chatMessage.trim() && !selectedFile) || isMessageSubmitting}
                                 className="shrink-0 h-[44px] w-[44px]"
                             >
                                 {isMessageSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
