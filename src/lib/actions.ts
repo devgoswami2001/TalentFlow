@@ -23,7 +23,7 @@ async function tryJson(response: Response) {
 // -------- Subscription Plans --------
 
 export async function getSubscriptionPlans(): Promise<{ success: boolean; data?: SubscriptionPlan[]; error?: string }> {
-  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/subscriptions/plans/`;
+  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/subscription-plans/`;
   
   try {
     const response = await fetch(url, {
