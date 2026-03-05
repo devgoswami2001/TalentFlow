@@ -72,13 +72,15 @@ export function ApplicantProfile({
   const [isNoteSubmitting, setIsNoteSubmitting] = React.useState(false);
 
   // Chat states
+  const [activeTab, setActiveTab] = React.useState("analysis");
   const [messages, setMessages] = React.useState<ChatMessage[]>([]);
   const [isChatLoading, setIsChatLoading] = React.useState(false);
   const [isMessageSubmitting, setIsMessageSubmitting] = React.useState(false);
   const [chatMessage, setChatMessage] = React.useState("");
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const messagesEndRef = React.useRef<HTMLDivElement>(null);
+  const isInitialChatLoad = React.useRef(true);
 
   const analysis = React.useMemo(() => {
     if (!applicant || !applicant.ai_remarks) {
@@ -106,20 +108,58 @@ export function ApplicantProfile({
     setIsNotesLoading(false);
   }, [applicant.id, toast]);
 
-  const handleFetchMessages = React.useCallback(async () => {
-    setIsChatLoading(true);
+  const handleFetchMessages = React.useCallback(async (isSilent = false) => {
+    if (!isSilent) setIsChatLoading(true);
     const result = await getChatMessages(applicant.id);
     if (result.success && result.data) {
-        setMessages(result.data);
-    } else {
+        setMessages(prev => {
+            // Only update state if data actually changed to prevent infinite loops or jarring jumps
+            const newCount = result.data?.length || 0;
+            const lastId = result.data && result.data.length > 0 ? result.data[result.data.length - 1].id : null;
+            const prevLastId = prev.length > 0 ? prev[prev.length - 1].id : null;
+
+            if (prev.length === newCount && lastId === prevLastId) {
+                return prev;
+            }
+            return result.data!;
+        });
+    } else if (!isSilent) {
         toast({
             variant: "destructive",
             title: "Failed to load chat",
             description: result.error,
         });
     }
-    setIsChatLoading(false);
+    if (!isSilent) setIsChatLoading(false);
   }, [applicant.id, toast]);
+
+  // Polling Effect
+  React.useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (activeTab === 'chat') {
+        handleFetchMessages(false); // Initial load with spinner
+        interval = setInterval(() => {
+            handleFetchMessages(true); // Silent update every 5 seconds
+        }, 5000);
+    } else {
+        isInitialChatLoad.current = true; // Reset when tab changes
+    }
+    return () => {
+        if (interval) clearInterval(interval);
+    };
+  }, [activeTab, handleFetchMessages]);
+
+  // Scroll to bottom effect
+  React.useEffect(() => {
+    if (activeTab === 'chat' && messages.length > 0) {
+        if (isInitialChatLoad.current) {
+            messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+            isInitialChatLoad.current = false;
+        } else {
+            messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+        }
+    }
+  }, [messages, activeTab]);
 
   const handleAddNote = async () => {
     if (!newNote.trim()) return;
@@ -143,13 +183,14 @@ export function ApplicantProfile({
     if (!chatMessage.trim() && !selectedFile) return;
     setIsMessageSubmitting(true);
     
-    // Now calling with separate message and file as per new spec
     const result = await sendChatMessage(applicant.id, chatMessage.trim(), selectedFile);
     if (result.success && result.data) {
         setMessages(prev => [...prev, result.data!]);
         setChatMessage("");
         setSelectedFile(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
+        // Scroll down after sending
+        setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
     } else {
         toast({
             variant: "destructive",
@@ -184,13 +225,6 @@ export function ApplicantProfile({
     setSelectedFile(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
-
-  // Scroll to bottom of chat when new messages arrive
-  React.useEffect(() => {
-    if (scrollRef.current) {
-        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages]);
 
   
   const getRecommendationBadge = (recommendation: string) => {
@@ -228,12 +262,12 @@ export function ApplicantProfile({
       </SheetHeader>
       
       <div className="flex-1 overflow-y-auto -mr-6 pr-6">
-        <Tabs defaultValue="analysis" className="mt-4 h-full flex flex-col">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4 h-full flex flex-col">
             <div className="px-6">
                  <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="analysis">AI Analysis</TabsTrigger>
                     <TabsTrigger value="notes" onClick={handleFetchNotes}>Notes</TabsTrigger>
-                    <TabsTrigger value="chat" onClick={handleFetchMessages}>Chat</TabsTrigger>
+                    <TabsTrigger value="chat">Chat</TabsTrigger>
                     <TabsTrigger value="actions">Actions</TabsTrigger>
                 </TabsList>
             </div>
@@ -431,12 +465,12 @@ export function ApplicantProfile({
                             <MessageCircle className="h-5 w-5 text-primary" />
                             <h3 className="font-semibold font-headline">Chat with {applicant.applicant_profile.first_name}</h3>
                         </div>
-                        <Button variant="ghost" size="sm" onClick={handleFetchMessages} disabled={isChatLoading}>
+                        <Button variant="ghost" size="sm" onClick={() => handleFetchMessages(false)} disabled={isChatLoading}>
                             <Loader2 className={cn("h-4 w-4", isChatLoading && "animate-spin")} />
                         </Button>
                     </div>
                     
-                    <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+                    <ScrollArea className="flex-1 p-4">
                         <div className="space-y-4">
                             {isChatLoading ? (
                                 <div className="space-y-4">
@@ -448,38 +482,41 @@ export function ApplicantProfile({
                                     ))}
                                 </div>
                             ) : messages.length > 0 ? (
-                                messages.map((msg) => (
-                                    <div 
-                                        key={msg.id} 
-                                        className={cn(
-                                            "flex flex-col max-w-[80%]",
-                                            msg.sender_role === 'employer' ? "ml-auto items-end" : "mr-auto items-start"
-                                        )}
-                                    >
-                                        <div className={cn(
-                                            "rounded-2xl px-4 py-2 text-sm shadow-sm",
-                                            msg.sender_role === 'employer' 
-                                                ? "bg-primary text-primary-foreground rounded-tr-none" 
-                                                : "bg-muted rounded-tl-none"
-                                        )}>
-                                            {msg.message && <p className="whitespace-pre-wrap">{msg.message}</p>}
-                                            {msg.attachment && (
-                                                <div className={cn("flex items-center gap-2 mt-2 p-2 rounded-md", msg.sender_role === 'employer' ? "bg-primary-foreground/10" : "bg-background/50")}>
-                                                    <FileText className="h-4 w-4 shrink-0" />
-                                                    <span className="text-xs truncate max-w-[150px]">Attachment</span>
-                                                    <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto" asChild>
-                                                        <a href={msg.attachment} target="_blank" rel="noopener noreferrer" download>
-                                                            <Download className="h-3 w-3" />
-                                                        </a>
-                                                    </Button>
-                                                </div>
+                                <>
+                                    {messages.map((msg) => (
+                                        <div 
+                                            key={msg.id} 
+                                            className={cn(
+                                                "flex flex-col max-w-[80%]",
+                                                msg.sender_role === 'employer' ? "ml-auto items-end" : "mr-auto items-start"
                                             )}
+                                        >
+                                            <div className={cn(
+                                                "rounded-2xl px-4 py-2 text-sm shadow-sm",
+                                                msg.sender_role === 'employer' 
+                                                    ? "bg-primary text-primary-foreground rounded-tr-none" 
+                                                    : "bg-muted rounded-tl-none"
+                                            )}>
+                                                {msg.message && <p className="whitespace-pre-wrap">{msg.message}</p>}
+                                                {msg.attachment && (
+                                                    <div className={cn("flex items-center gap-2 mt-2 p-2 rounded-md", msg.sender_role === 'employer' ? "bg-primary-foreground/10" : "bg-background/50")}>
+                                                        <FileText className="h-4 w-4 shrink-0" />
+                                                        <span className="text-xs truncate max-w-[150px]">Attachment</span>
+                                                        <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto" asChild>
+                                                            <a href={msg.attachment} target="_blank" rel="noopener noreferrer" download>
+                                                                <Download className="h-3 w-3" />
+                                                            </a>
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <span className="text-[10px] text-muted-foreground mt-1 px-1">
+                                                {format(new Date(msg.sent_at), "p")}
+                                            </span>
                                         </div>
-                                        <span className="text-[10px] text-muted-foreground mt-1 px-1">
-                                            {format(new Date(msg.sent_at), "p")}
-                                        </span>
-                                    </div>
-                                ))
+                                    ))}
+                                    <div ref={messagesEndRef} />
+                                </>
                             ) : (
                                 <div className="flex flex-col items-center justify-center text-center p-10 h-[300px]">
                                     <div className="p-4 bg-primary/10 rounded-full mb-4">
