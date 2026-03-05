@@ -93,7 +93,7 @@ export async function initiatePayUPayment(planId: number): Promise<{ success: bo
     return { success: false, error: "Not authenticated" };
   }
 
-  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/start-payment//`;
+  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/start-payment/`;
 
   try {
     const response = await fetch(url, {
@@ -1129,7 +1129,7 @@ export async function getApplicantsForJob(jobId: number, jobTitle: string) {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken')?.value;
 
-    if (!token) {
+    if (!accessToken) {
         return { success: false, error: "Not authenticated" };
     }
     
@@ -1138,7 +1138,7 @@ export async function getApplicantsForJob(jobId: number, jobTitle: string) {
     try {
         const response = await fetch(url, {
             method: 'GET',
-            headers: { 'Authorization': `Bearer ${token}` },
+            headers: { 'Authorization': `Bearer ${accessToken}` },
             cache: 'no-store',
         });
 
