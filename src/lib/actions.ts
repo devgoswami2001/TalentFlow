@@ -15,7 +15,8 @@ async function tryJson(response: Response) {
     try {
         return JSON.parse(text);
     } catch (e) {
-        throw new Error(`Server returned non-JSON response (${response.status}). This often means the API URL is incorrect or the server crashed. Response start: ${text.substring(0, 100)}`);
+        console.error(`[API Error] Non-JSON response from ${response.url}. Status: ${response.status}. Body starts with: ${text.substring(0, 200)}`);
+        throw new Error(`Server returned non-JSON response (${response.status}). This often means the API URL is incorrect or the server encountered an error.`);
     }
 }
 
@@ -129,7 +130,7 @@ export async function getDashboardPageData(accessToken?: string) {
     const statsResponse = await fetch(statsUrl, { headers, cache: "no-store" });
 
     if (!statsResponse.ok) {
-      const errorData = await statsResponse.json();
+      const errorData = await tryJson(statsResponse);
       throw new Error(errorData.detail || `Failed to fetch dashboard stats: ${statsResponse.statusText}`);
     }
     const result = await statsResponse.json();
@@ -1188,7 +1189,7 @@ export async function getChatMessages(applicationId: number) {
         return { success: false, error: "Not authenticated" };
     }
     
-    // Using trailing slash as per specification/common Django behavior
+    // Ensure URL has a trailing slash for Django endpoints
     const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/job-chat/messages/?job_application_id=${applicationId}`;
 
     try {
@@ -1201,7 +1202,7 @@ export async function getChatMessages(applicationId: number) {
         if (!response.ok) {
             if (response.status === 404) return { success: true, data: [] };
             const errorData = await tryJson(response);
-            throw new Error(errorData.detail || `Failed to fetch chat messages.`);
+            throw new Error(errorData.detail || `Failed to fetch chat messages (Status: ${response.status})`);
         }
 
         const result = await response.json();

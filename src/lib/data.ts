@@ -148,7 +148,7 @@ export type PostComment = {
 }
 
 
-// Updated Chat Message Type to match new spec
+// Updated Chat Message Type to match successful response example
 export type ChatMessage = {
     id: string; // UUID
     sender_id: string;
