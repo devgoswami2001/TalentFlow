@@ -2,15 +2,18 @@
 "use client";
 
 import * as React from "react";
-import { Check, Loader2, Zap, CreditCard, ShieldCheck, Users, Clock, BadgeCheck, Calendar, Star } from "lucide-react";
+import { Check, Loader2, Zap, CreditCard, ShieldCheck, Users, Clock, BadgeCheck, Calendar, Star, PlusCircle, MinusCircle } from "lucide-react";
 import type { SubscriptionPlan, ActiveSubscription } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { initiatePayUPayment } from "@/lib/actions";
+import { initiatePayUPayment, requestHrSeats } from "@/lib/actions";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Separator } from "./ui/separator";
 
 type SubscriptionManagementProps = {
   plans: SubscriptionPlan[];
@@ -18,35 +21,37 @@ type SubscriptionManagementProps = {
 };
 
 export function SubscriptionManagement({ plans, activeSubscription }: SubscriptionManagementProps) {
-  const [isLoading, setIsLoading] = React.useState<number | null>(null);
+  const [isPlanLoading, setIsPlanLoading] = React.useState<number | null>(null);
+  const [isSeatsLoading, setIsSeatsLoading] = React.useState(false);
+  const [seatCount, setSeatCount] = React.useState(1);
   const { toast } = useToast();
 
+  /**
+   * Helper to programmatically submit PayU form
+   */
+  const redirectToPayU = (payu_url: string, payu_data: any) => {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = payu_url;
+
+    for (const key in payu_data) {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = key;
+      input.value = payu_data[key];
+      form.appendChild(input);
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+  };
+
   const handleUpgrade = async (planId: number) => {
-    setIsLoading(planId);
+    setIsPlanLoading(planId);
     try {
-      // ✅ Using server action that hits /api/v1/employer/start-payment/
       const result = await initiatePayUPayment(planId);
-      
       if (result.success && result.data) {
-        // Response structure: { payu_url: "...", payu_data: { ... } }
-        const { payu_url, payu_data } = result.data;
-        
-        // Programmatically create and submit PayU form
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = payu_url;
-
-        // Add all fields from payu_data as hidden inputs
-        for (const key in payu_data) {
-          const input = document.createElement('input');
-          input.type = 'hidden';
-          input.name = key;
-          input.value = payu_data[key];
-          form.appendChild(input);
-        }
-
-        document.body.appendChild(form);
-        form.submit();
+        redirectToPayU(result.data.payu_url, result.data.payu_data);
       } else {
         toast({
           variant: "destructive",
@@ -61,7 +66,32 @@ export function SubscriptionManagement({ plans, activeSubscription }: Subscripti
         description: error.message || "Failed to connect to payment gateway.",
       });
     } finally {
-      setIsLoading(null);
+      setIsPlanLoading(null);
+    }
+  };
+
+  const handleBuySeats = async () => {
+    if (seatCount < 1) return;
+    setIsSeatsLoading(true);
+    try {
+      const result = await requestHrSeats(seatCount);
+      if (result.success && result.data) {
+        redirectToPayU(result.data.payu_url, result.data.payu_data);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Failed to request seats",
+          description: result.error || "An unknown error occurred.",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to initiate seat purchase.",
+      });
+    } finally {
+      setIsSeatsLoading(false);
     }
   };
 
@@ -107,7 +137,7 @@ export function SubscriptionManagement({ plans, activeSubscription }: Subscripti
               </div>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="flex items-center gap-3">
                 <Calendar className="h-5 w-5 text-muted-foreground" />
@@ -128,6 +158,57 @@ export function SubscriptionManagement({ plans, activeSubscription }: Subscripti
                 <div className="text-sm">
                   <p className="text-muted-foreground">Status</p>
                   <p className="font-bold text-green-500">Secure & Verified</p>
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Extra Seats Purchase Section */}
+            <div className="space-y-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-bold font-headline">Need more HR seats?</h3>
+                  <p className="text-sm text-muted-foreground">Add extra team members to your workspace instantly.</p>
+                </div>
+                <div className="flex items-center gap-4 bg-background p-4 rounded-xl border shadow-sm">
+                  <div className="grid gap-1.5">
+                    <Label htmlFor="seat-count" className="text-xs uppercase text-muted-foreground font-bold">Number of Seats</Label>
+                    <div className="flex items-center gap-3">
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="h-8 w-8" 
+                        onClick={() => setSeatCount(Math.max(1, seatCount - 1))}
+                        disabled={isSeatsLoading}
+                      >
+                        <MinusCircle className="h-4 w-4" />
+                      </Button>
+                      <span className="text-xl font-bold w-8 text-center">{seatCount}</span>
+                      <Button 
+                        variant="outline" 
+                        size="icon" 
+                        className="h-8 w-8" 
+                        onClick={() => setSeatCount(seatCount + 1)}
+                        disabled={isSeatsLoading}
+                      >
+                        <PlusCircle className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="h-10 w-px bg-border mx-2" />
+                  <Button 
+                    className="h-12 px-6" 
+                    onClick={handleBuySeats} 
+                    disabled={isSeatsLoading}
+                  >
+                    {isSeatsLoading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Zap className="mr-2 h-4 w-4 fill-current" />
+                    )}
+                    Purchase Seats
+                  </Button>
                 </div>
               </div>
             </div>
@@ -200,10 +281,10 @@ export function SubscriptionManagement({ plans, activeSubscription }: Subscripti
                 <Button 
                   className="w-full group" 
                   variant={isCurrentPlan ? "outline" : (isGrowth ? "default" : "outline")}
-                  disabled={isLoading !== null || isCurrentPlan}
+                  disabled={isPlanLoading !== null || isCurrentPlan}
                   onClick={() => handleUpgrade(plan.id)}
                 >
-                  {isLoading === plan.id ? (
+                  {isPlanLoading === plan.id ? (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   ) : isCurrentPlan ? (
                     "Active Plan"

@@ -23,7 +23,6 @@ async function tryJson(response: Response) {
 // -------- Subscription Plans --------
 
 export async function getSubscriptionPlans(): Promise<{ success: boolean; data?: SubscriptionPlan[]; error?: string }> {
-  // ✅ EXACT URL PROVIDED BY USER
   const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/subscription-plans/`;
   
   try {
@@ -56,7 +55,6 @@ export async function getActiveSubscription(): Promise<{ success: boolean; data?
     return { success: false, error: "Not authenticated" };
   }
 
-  // ✅ EXACT URL PROVIDED BY USER
   const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/active-subscription/`;
 
   try {
@@ -69,16 +67,15 @@ export async function getActiveSubscription(): Promise<{ success: boolean; data?
       cache: 'no-store',
     });
 
-    const result = await tryJson(response);
-
     if (!response.ok) {
-      // If 404, might mean no active subscription, which is a valid state for UI
       if (response.status === 404) {
           return { success: true, data: { subscription: null, is_active: false } };
       }
+      const result = await tryJson(response);
       throw new Error(result.detail || `Failed to fetch active subscription (Status: ${response.status})`);
     }
 
+    const result = await response.json();
     return { success: true, data: result as ActiveSubscriptionResponse };
   } catch (error: any) {
     console.error("Get Active Subscription Error:", error);
@@ -96,8 +93,7 @@ export async function initiatePayUPayment(planId: number): Promise<{ success: bo
     return { success: false, error: "Not authenticated" };
   }
 
-  // ✅ EXACT URL PROVIDED BY USER
-  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/start-payment/`;
+  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/start-payment//`;
 
   try {
     const response = await fetch(url, {
@@ -106,7 +102,6 @@ export async function initiatePayUPayment(planId: number): Promise<{ success: bo
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
-      // ✅ EXACT PAYLOAD PROVIDED BY USER
       body: JSON.stringify({ plan_id: planId }),
     });
 
@@ -116,10 +111,46 @@ export async function initiatePayUPayment(planId: number): Promise<{ success: bo
       throw new Error(result.detail || result.message || `Failed to initiate payment (Status: ${response.status})`);
     }
 
-    // Backend returns { payu_url: "...", payu_data: { key, txnid, hash, etc... } }
     return { success: true, data: result };
   } catch (error: any) {
     console.error("Initiate Payment Error:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+/**
+ * Requests extra HR seats for an active subscription.
+ * Hits /api/v1/employer/request-hr-seats/
+ */
+export async function requestHrSeats(seats: number): Promise<{ success: boolean; data?: any; error?: string }> {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value;
+
+  if (!accessToken) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/request-hr-seats/`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ seats }),
+    });
+
+    const result = await tryJson(response);
+
+    if (!response.ok) {
+      throw new Error(result.message || result.detail || `Failed to request seats (Status: ${response.status})`);
+    }
+
+    return { success: true, data: result };
+  } catch (error: any) {
+    console.error("Request HR Seats Error:", error);
     return { success: false, error: error.message };
   }
 }
@@ -1098,7 +1129,7 @@ export async function getApplicantsForJob(jobId: number, jobTitle: string) {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken')?.value;
 
-    if (!accessToken) {
+    if (!token) {
         return { success: false, error: "Not authenticated" };
     }
     
@@ -1107,7 +1138,7 @@ export async function getApplicantsForJob(jobId: number, jobTitle: string) {
     try {
         const response = await fetch(url, {
             method: 'GET',
-            headers: { 'Authorization': `Bearer ${accessToken}` },
+            headers: { 'Authorization': `Bearer ${token}` },
             cache: 'no-store',
         });
 
@@ -1293,7 +1324,6 @@ export async function getChatMessages(applicationId: number) {
         return { success: false, error: "Not authenticated" };
     }
     
-    // ✅ EXACT URL PROVIDED BY USER
     const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/job-chat/messages/${applicationId}/`;
 
     try {
@@ -1327,7 +1357,6 @@ export async function sendChatMessage(applicationId: number, message: string, fi
         return { success: false, error: "Not authenticated" };
     }
     
-    // ✅ EXACT URL PROVIDED BY USER
     const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/job-chat/send-message/`;
 
     try {
@@ -1352,7 +1381,6 @@ export async function sendChatMessage(applicationId: number, message: string, fi
                     'Authorization': `Bearer ${accessToken}`,
                     'Content-Type': 'application/json',
                 },
-                // ✅ EXACT PAYLOAD PROVIDED BY USER
                 body: JSON.stringify({
                     job_application_id: applicationId.toString(),
                     message: message,
