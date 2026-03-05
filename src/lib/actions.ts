@@ -875,7 +875,7 @@ export async function createLeadershipMember(formData: FormData): Promise<Server
         const response = await fetch(url, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${accessToken}`,
+                'Authorization': `Bearer ${token}`,
             },
             body: formData,
         });
@@ -1189,7 +1189,6 @@ export async function getChatMessages(applicationId: number) {
         return { success: false, error: "Not authenticated" };
     }
     
-    // Updated URL to include v1/employer prefix
     const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/job-chat/messages/?job_application_id=${applicationId}`;
 
     try {
@@ -1206,7 +1205,8 @@ export async function getChatMessages(applicationId: number) {
         }
 
         const result = await response.json();
-        return { success: true, data: result as ChatMessage[] };
+        // Extract results from paginated response
+        return { success: true, data: (result.results || []) as ChatMessage[] };
 
     } catch (error: any) {
         console.error("Get Chat Messages Error:", error);
@@ -1222,7 +1222,6 @@ export async function sendChatMessage(applicationId: number, message: string, fi
         return { success: false, error: "Not authenticated" };
     }
     
-    // Updated URL to the specific one provided by the user
     const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/job-chat/send-message/`;
 
     try {
