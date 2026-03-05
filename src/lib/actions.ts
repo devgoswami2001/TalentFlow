@@ -875,7 +875,7 @@ export async function createLeadershipMember(formData: FormData): Promise<Server
         const response = await fetch(url, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${token}`,
+                'Authorization': `Bearer ${accessToken}`,
             },
             body: formData,
         });
@@ -1189,7 +1189,7 @@ export async function getChatMessages(applicationId: number) {
         return { success: false, error: "Not authenticated" };
     }
     
-    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/job-chat/messages/?job_application_id=${applicationId}`;
+    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/job-chat/messages/${applicationId}/`;
 
     try {
         const response = await fetch(url, {
