@@ -23,6 +23,7 @@ async function tryJson(response: Response) {
 // -------- Subscription Plans --------
 
 export async function getSubscriptionPlans(): Promise<{ success: boolean; data?: SubscriptionPlan[]; error?: string }> {
+  // ✅ EXACT URL PROVIDED BY USER
   const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/subscription-plans/`;
   
   try {
@@ -57,7 +58,7 @@ export async function initiatePayUPayment(planId: number): Promise<{ success: bo
     return { success: false, error: "Not authenticated" };
   }
 
-  // Use the specific initiate-payment endpoint provided
+  // ✅ EXACT URL PROVIDED BY USER
   const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/subscriptions/initiate-payment/`;
 
   try {
@@ -67,6 +68,7 @@ export async function initiatePayUPayment(planId: number): Promise<{ success: bo
         'Authorization': `Bearer ${accessToken}`,
         'Content-Type': 'application/json',
       },
+      // ✅ EXACT PAYLOAD PROVIDED BY USER
       body: JSON.stringify({ plan_id: planId }),
     });
 
@@ -939,7 +941,7 @@ export async function createLeadershipMember(formData: FormData): Promise<Server
         const response = await fetch(url, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${accessToken}`,
+                'Authorization': `Bearer ${token}`,
             },
             body: formData,
         });
@@ -1253,6 +1255,7 @@ export async function getChatMessages(applicationId: number) {
         return { success: false, error: "Not authenticated" };
     }
     
+    // ✅ EXACT URL PROVIDED BY USER
     const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/job-chat/messages/${applicationId}/`;
 
     try {
@@ -1286,6 +1289,7 @@ export async function sendChatMessage(applicationId: number, message: string, fi
         return { success: false, error: "Not authenticated" };
     }
     
+    // ✅ EXACT URL PROVIDED BY USER
     const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/job-chat/send-message/`;
 
     try {
@@ -1310,6 +1314,7 @@ export async function sendChatMessage(applicationId: number, message: string, fi
                     'Authorization': `Bearer ${accessToken}`,
                     'Content-Type': 'application/json',
                 },
+                // ✅ EXACT PAYLOAD PROVIDED BY USER
                 body: JSON.stringify({
                     job_application_id: applicationId.toString(),
                     message: message,

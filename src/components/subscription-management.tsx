@@ -22,6 +22,7 @@ export function SubscriptionManagement({ plans }: SubscriptionManagementProps) {
   const handleUpgrade = async (planId: number) => {
     setIsLoading(planId);
     try {
+      // ✅ Using server action that hits /api/v1/employer/subscriptions/initiate-payment/
       const result = await initiatePayUPayment(planId);
       
       if (result.success && result.data) {
