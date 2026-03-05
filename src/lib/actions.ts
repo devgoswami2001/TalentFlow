@@ -78,8 +78,8 @@ export async function initiatePayUPayment(planId: number): Promise<{ success: bo
   if (!plan) return { success: false, error: "Invalid plan selected." };
 
   // 3. Prepare PayU parameters
-  const merchantKey = process.env.PAYU_MERCHANT_KEY || 'GTK38V';
-  const salt = process.env.PAYU_MERCHANT_SALT || 'eCwVEv7v';
+  const merchantKey = process.env.PAYU_MERCHANT_KEY || 'poYVYx';
+  const salt = process.env.PAYU_SALT || 'jTg2IsD07SJ5iEEd2RwV1q7LWxQktwZv';
   const txnid = `txn_${Date.now()}`;
   const amount = parseFloat(plan.price).toString();
   const productinfo = plan.name;
