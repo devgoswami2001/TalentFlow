@@ -148,17 +148,17 @@ export type PostComment = {
 }
 
 
-// Chat Message Type
+// Updated Chat Message Type to match new spec
 export type ChatMessage = {
-    id: number;
-    application: number;
-    sender_email: string;
+    id: string; // UUID
+    sender_id: string;
     sender_name: string;
     sender_role: 'employer' | 'job_seeker';
-    content: string;
-    file_url?: string;
-    file_name?: string;
-    created_at: string;
+    message: string;
+    attachment: string | null; // URL
+    message_type: 'text' | 'file';
+    is_read: boolean;
+    sent_at: string; // ISO string
 };
 
 

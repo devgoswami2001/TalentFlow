@@ -143,13 +143,8 @@ export function ApplicantProfile({
     if (!chatMessage.trim() && !selectedFile) return;
     setIsMessageSubmitting(true);
     
-    const formData = new FormData();
-    formData.append("content", chatMessage.trim());
-    if (selectedFile) {
-        formData.append("file", selectedFile);
-    }
-
-    const result = await sendChatMessage(applicant.id, formData);
+    // Now calling with separate message and file as per new spec
+    const result = await sendChatMessage(applicant.id, chatMessage.trim(), selectedFile);
     if (result.success && result.data) {
         setMessages(prev => [...prev, result.data!]);
         setChatMessage("");
@@ -467,13 +462,13 @@ export function ApplicantProfile({
                                                 ? "bg-primary text-primary-foreground rounded-tr-none" 
                                                 : "bg-muted rounded-tl-none"
                                         )}>
-                                            {msg.content && <p className="whitespace-pre-wrap">{msg.content}</p>}
-                                            {msg.file_url && (
+                                            {msg.message && <p className="whitespace-pre-wrap">{msg.message}</p>}
+                                            {msg.attachment && (
                                                 <div className={cn("flex items-center gap-2 mt-2 p-2 rounded-md", msg.sender_role === 'employer' ? "bg-primary-foreground/10" : "bg-background/50")}>
                                                     <FileText className="h-4 w-4 shrink-0" />
-                                                    <span className="text-xs truncate max-w-[150px]">{msg.file_name || 'Attachment'}</span>
+                                                    <span className="text-xs truncate max-w-[150px]">Attachment</span>
                                                     <Button variant="ghost" size="icon" className="h-6 w-6 ml-auto" asChild>
-                                                        <a href={msg.file_url} target="_blank" rel="noopener noreferrer" download>
+                                                        <a href={msg.attachment} target="_blank" rel="noopener noreferrer" download>
                                                             <Download className="h-3 w-3" />
                                                         </a>
                                                     </Button>
@@ -481,7 +476,7 @@ export function ApplicantProfile({
                                             )}
                                         </div>
                                         <span className="text-[10px] text-muted-foreground mt-1 px-1">
-                                            {format(new Date(msg.created_at), "p")}
+                                            {format(new Date(msg.sent_at), "p")}
                                         </span>
                                     </div>
                                 ))

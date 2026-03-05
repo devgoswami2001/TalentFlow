@@ -1187,7 +1187,7 @@ export async function getChatMessages(applicationId: number) {
         return { success: false, error: "Not authenticated" };
     }
     
-    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/applications/${applicationId}/messages/`;
+    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/job-chat/messages/?job_application_id=${applicationId}`;
 
     try {
         const response = await fetch(url, {
@@ -1197,7 +1197,6 @@ export async function getChatMessages(applicationId: number) {
         });
 
         if (!response.ok) {
-            // If endpoint doesn't exist yet, return empty list gracefully
             if (response.status === 404) return { success: true, data: [] };
             const errorData = await response.json();
             throw new Error(errorData.detail || `Failed to fetch chat messages.`);
@@ -1212,7 +1211,7 @@ export async function getChatMessages(applicationId: number) {
     }
 }
 
-export async function sendChatMessage(applicationId: number, formData: FormData) {
+export async function sendChatMessage(applicationId: number, message: string, file: File | null) {
     const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken')?.value;
 
@@ -1220,20 +1219,42 @@ export async function sendChatMessage(applicationId: number, formData: FormData)
         return { success: false, error: "Not authenticated" };
     }
     
-    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/applications/${applicationId}/messages/`;
+    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/job-chat/send-message/`;
 
     try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 
-                'Authorization': `Bearer ${accessToken}`,
-            },
-            body: formData,
-        });
+        let response;
+        if (file) {
+            // Send as Form Data (Text + File or File only)
+            const formData = new FormData();
+            formData.append("job_application_id", applicationId.toString());
+            if (message) formData.append("message", message);
+            formData.append("attachment", file);
+
+            response = await fetch(url, {
+                method: 'POST',
+                headers: { 
+                    'Authorization': `Bearer ${accessToken}`,
+                },
+                body: formData,
+            });
+        } else {
+            // Send as JSON (Text only)
+            response = await fetch(url, {
+                method: 'POST',
+                headers: { 
+                    'Authorization': `Bearer ${accessToken}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    job_application_id: applicationId.toString(),
+                    message: message,
+                }),
+            });
+        }
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.content?.[0] || errorData.detail || `Failed to send message.`);
+            throw new Error(errorData.message || errorData.detail || `Failed to send message.`);
         }
 
         const result = await response.json();
