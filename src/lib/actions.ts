@@ -1189,8 +1189,8 @@ export async function getChatMessages(applicationId: number) {
         return { success: false, error: "Not authenticated" };
     }
     
-    // Ensure URL has a trailing slash for Django endpoints
-    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/job-chat/messages/?job_application_id=${applicationId}`;
+    // Updated URL to include v1/employer prefix
+    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/job-chat/messages/?job_application_id=${applicationId}`;
 
     try {
         const response = await fetch(url, {
@@ -1222,7 +1222,8 @@ export async function sendChatMessage(applicationId: number, message: string, fi
         return { success: false, error: "Not authenticated" };
     }
     
-    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/job-chat/send-message/`;
+    // Updated URL to the specific one provided by the user
+    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/job-chat/send-message/`;
 
     try {
         let response;
