@@ -59,7 +59,7 @@ export async function initiatePayUPayment(planId: number): Promise<{ success: bo
   }
 
   // ✅ EXACT URL PROVIDED BY USER
-  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/subscriptions/initiate-payment/`;
+  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/start-payment/`;
 
   try {
     const response = await fetch(url, {
@@ -941,7 +941,7 @@ export async function createLeadershipMember(formData: FormData): Promise<Server
         const response = await fetch(url, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${token}`,
+                'Authorization': `Bearer ${accessToken}`,
             },
             body: formData,
         });
