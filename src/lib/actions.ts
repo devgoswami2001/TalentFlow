@@ -4,7 +4,7 @@
 import { analyzeResume } from "@/ai/flows/resume-analyzer";
 import { z } from "zod";
 import { cookies } from "next/headers";
-import type { Job, NewsPost, CompanyProfile, User, LeadershipMember, Applicant, Note, ProgressReportData } from "./data";
+import type { Job, NewsPost, CompanyProfile, User, LeadershipMember, Applicant, Note, ProgressReportData, ChatMessage } from "./data";
 
 
 import { parseISO } from "date-fns";
@@ -1148,7 +1148,7 @@ export async function deleteApplicantNote(remarkId: number) {
 
 export async function getApplicantProgressReport(applicationId: string): Promise<{ data: ProgressReportData | null; error: string | null }> {
     const cookieStore = await cookies();
-    const accessToken = cookieStore.get('accessToken')?.value;
+    const accessToken = cookieStore.get("accessToken")?.value;
 
     if (!accessToken) {
         return { data: null, error: "Not authenticated" };
@@ -1174,5 +1174,74 @@ export async function getApplicantProgressReport(applicationId: string): Promise
     } catch (error: any) {
         console.error("Get Applicant Progress Report Error:", error);
         return { data: null, error: "Failed to load applicant progress report." };
+    }
+}
+
+// --- Chat Actions ---
+
+export async function getChatMessages(applicationId: number) {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('accessToken')?.value;
+
+    if (!accessToken) {
+        return { success: false, error: "Not authenticated" };
+    }
+    
+    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/applications/${applicationId}/messages/`;
+
+    try {
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${accessToken}` },
+            cache: 'no-store',
+        });
+
+        if (!response.ok) {
+            // If endpoint doesn't exist yet, return empty list gracefully
+            if (response.status === 404) return { success: true, data: [] };
+            const errorData = await response.json();
+            throw new Error(errorData.detail || `Failed to fetch chat messages.`);
+        }
+
+        const result = await response.json();
+        return { success: true, data: result as ChatMessage[] };
+
+    } catch (error: any) {
+        console.error("Get Chat Messages Error:", error);
+        return { success: false, error: error.message };
+    }
+}
+
+export async function sendChatMessage(applicationId: number, content: string) {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get('accessToken')?.value;
+
+    if (!accessToken) {
+        return { success: false, error: "Not authenticated" };
+    }
+    
+    const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/applications/${applicationId}/messages/`;
+
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 
+                'Authorization': `Bearer ${accessToken}`,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ content: content }),
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.content?.[0] || errorData.detail || `Failed to send message.`);
+        }
+
+        const result = await response.json();
+        return { success: true, data: result as ChatMessage };
+
+    } catch (error: any) {
+        console.error("Send Chat Message Error:", error);
+        return { success: false, error: error.message };
     }
 }

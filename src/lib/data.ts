@@ -1,5 +1,4 @@
 
-
 export type User = {
   id: number;
   user_email: string;
@@ -54,6 +53,7 @@ export type ApplicantProfileData = {
     country: string;
     headline: string;
     summary: string;
+    profile_picture?: string;
 };
 
 export type AIRemarks = {
@@ -146,6 +146,18 @@ export type PostComment = {
     replies_count: number;
     created_at: string;
 }
+
+
+// Chat Message Type
+export type ChatMessage = {
+    id: number;
+    application: number;
+    sender_email: string;
+    sender_name: string;
+    sender_role: 'employer' | 'job_seeker';
+    content: string;
+    created_at: string;
+};
 
 
 // This mock data is no longer used by the JobManagement component but is kept for other parts of the app.
@@ -408,5 +420,3 @@ export type ProgressReportData = {
     application: ApplicationData;
     remarks: any[];
 };
-
-    

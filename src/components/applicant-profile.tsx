@@ -1,5 +1,4 @@
 
-
 "use client";
 
 import * as React from "react";
@@ -20,19 +19,21 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import type { Applicant, Note, ApplicantStatus } from "@/lib/data";
+import type { Applicant, Note, ApplicantStatus, ChatMessage } from "@/lib/data";
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { Button } from "./ui/button";
-import { AlertTriangle, Briefcase, Mail, Phone, Printer, UserCircle, MessageSquare, CheckCircle, Star, ThumbsUp, ThumbsDown, XCircle, Lightbulb, Trash2, Send, Loader2, FileText } from "lucide-react";
+import { AlertTriangle, Briefcase, Mail, Phone, Printer, UserCircle, MessageSquare, CheckCircle, Star, ThumbsUp, ThumbsDown, XCircle, Lightbulb, Trash2, Send, Loader2, FileText, MessageCircle } from "lucide-react";
 import Link from "next/link";
 import { Textarea } from "./ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Separator } from "./ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { format, formatDistanceToNow } from "date-fns";
-import { getApplicantNotes, addApplicantNote, deleteApplicantNote } from "@/lib/actions";
+import { getApplicantNotes, addApplicantNote, deleteApplicantNote, getChatMessages, sendChatMessage } from "@/lib/actions";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
+import { ScrollArea } from "./ui/scroll-area";
+import { cn } from "@/lib/utils";
 
 type ApplicantProfileProps = {
   applicant: Applicant;
@@ -70,6 +71,13 @@ export function ApplicantProfile({
   const [isNotesLoading, setIsNotesLoading] = React.useState(false);
   const [isNoteSubmitting, setIsNoteSubmitting] = React.useState(false);
 
+  // Chat states
+  const [messages, setMessages] = React.useState<ChatMessage[]>([]);
+  const [isChatLoading, setIsChatLoading] = React.useState(false);
+  const [isMessageSubmitting, setIsMessageSubmitting] = React.useState(false);
+  const [chatMessage, setChatMessage] = React.useState("");
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+
   const analysis = React.useMemo(() => {
     if (!applicant || !applicant.ai_remarks) {
       return null;
@@ -96,6 +104,21 @@ export function ApplicantProfile({
     setIsNotesLoading(false);
   }, [applicant.id, toast]);
 
+  const handleFetchMessages = React.useCallback(async () => {
+    setIsChatLoading(true);
+    const result = await getChatMessages(applicant.id);
+    if (result.success && result.data) {
+        setMessages(result.data);
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Failed to load chat",
+            description: result.error,
+        });
+    }
+    setIsChatLoading(false);
+  }, [applicant.id, toast]);
+
   const handleAddNote = async () => {
     if (!newNote.trim()) return;
     setIsNoteSubmitting(true);
@@ -114,6 +137,23 @@ export function ApplicantProfile({
     setIsNoteSubmitting(false);
   };
 
+  const handleSendMessage = async () => {
+    if (!chatMessage.trim()) return;
+    setIsMessageSubmitting(true);
+    const result = await sendChatMessage(applicant.id, chatMessage.trim());
+    if (result.success && result.data) {
+        setMessages(prev => [...prev, result.data!]);
+        setChatMessage("");
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Failed to send message",
+            description: result.error,
+        });
+    }
+    setIsMessageSubmitting(false);
+  };
+
   const handleDeleteNote = async (remarkId: number) => {
     const result = await deleteApplicantNote(remarkId);
     if (result.success) {
@@ -127,6 +167,13 @@ export function ApplicantProfile({
         });
     }
   }
+
+  // Scroll to bottom of chat when new messages arrive
+  React.useEffect(() => {
+    if (scrollRef.current) {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   
   const getRecommendationBadge = (recommendation: string) => {
@@ -143,7 +190,10 @@ export function ApplicantProfile({
   return (
     <>
       <SheetHeader className="text-left flex-row gap-4 items-center space-y-0 p-6 pb-0">
-        
+        <Avatar className="h-16 w-16 border-2 border-primary/20">
+            <AvatarImage src={applicant.avatar} alt={applicant.applicant_profile.full_name} data-ai-hint="person portrait" />
+            <AvatarFallback>{applicant.applicant_profile.full_name.charAt(0)}</AvatarFallback>
+        </Avatar>
         <div className="space-y-1">
           <SheetTitle className="text-2xl font-headline">{applicant.applicant_profile.full_name}</SheetTitle>
           <SheetDescription className="text-base flex flex-col sm:flex-row sm:items-center sm:gap-4 gap-1">
@@ -161,11 +211,12 @@ export function ApplicantProfile({
       </SheetHeader>
       
       <div className="flex-1 overflow-y-auto -mr-6 pr-6">
-        <Tabs defaultValue="analysis" className="mt-4">
+        <Tabs defaultValue="analysis" className="mt-4 h-full flex flex-col">
             <div className="px-6">
-                 <TabsList className="grid w-full grid-cols-3">
+                 <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="analysis">AI Analysis</TabsTrigger>
                     <TabsTrigger value="notes" onClick={handleFetchNotes}>Notes</TabsTrigger>
+                    <TabsTrigger value="chat" onClick={handleFetchMessages}>Chat</TabsTrigger>
                     <TabsTrigger value="actions">Actions</TabsTrigger>
                 </TabsList>
             </div>
@@ -355,6 +406,96 @@ export function ApplicantProfile({
                     </div>
                 </div>
             </TabsContent>
+            
+            <TabsContent value="chat" className="flex-1 flex flex-col min-h-0 p-0 overflow-hidden">
+                <div className="flex flex-col h-full bg-muted/10">
+                    <div className="p-4 border-b bg-background/50 backdrop-blur-sm flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <MessageCircle className="h-5 w-5 text-primary" />
+                            <h3 className="font-semibold font-headline">Chat with {applicant.applicant_profile.first_name}</h3>
+                        </div>
+                        <Button variant="ghost" size="sm" onClick={handleFetchMessages} disabled={isChatLoading}>
+                            <Loader2 className={cn("h-4 w-4", isChatLoading && "animate-spin")} />
+                        </Button>
+                    </div>
+                    
+                    <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+                        <div className="space-y-4">
+                            {isChatLoading ? (
+                                <div className="space-y-4">
+                                    {[...Array(3)].map((_, i) => (
+                                        <div key={i} className={cn("flex gap-3", i % 2 === 0 ? "flex-row" : "flex-row-reverse")}>
+                                            <Skeleton className="h-8 w-8 rounded-full shrink-0" />
+                                            <Skeleton className="h-16 w-2/3 rounded-lg" />
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : messages.length > 0 ? (
+                                messages.map((msg) => (
+                                    <div 
+                                        key={msg.id} 
+                                        className={cn(
+                                            "flex flex-col max-w-[80%]",
+                                            msg.sender_role === 'employer' ? "ml-auto items-end" : "mr-auto items-start"
+                                        )}
+                                    >
+                                        <div className={cn(
+                                            "rounded-2xl px-4 py-2 text-sm shadow-sm",
+                                            msg.sender_role === 'employer' 
+                                                ? "bg-primary text-primary-foreground rounded-tr-none" 
+                                                : "bg-muted rounded-tl-none"
+                                        )}>
+                                            <p className="whitespace-pre-wrap">{msg.content}</p>
+                                        </div>
+                                        <span className="text-[10px] text-muted-foreground mt-1 px-1">
+                                            {format(new Date(msg.created_at), "p")}
+                                        </span>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="flex flex-col items-center justify-center text-center p-10 h-[300px]">
+                                    <div className="p-4 bg-primary/10 rounded-full mb-4">
+                                        <MessageSquare className="h-8 w-8 text-primary" />
+                                    </div>
+                                    <h4 className="font-semibold">Start a Conversation</h4>
+                                    <p className="text-sm text-muted-foreground max-w-[200px]">
+                                        Send a message to the candidate to discuss the role or schedule an interview.
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+                    </ScrollArea>
+
+                    <div className="p-4 border-t bg-background">
+                        <div className="flex gap-2">
+                            <Textarea 
+                                placeholder="Type a message..."
+                                value={chatMessage}
+                                onChange={(e) => setChatMessage(e.target.value)}
+                                className="min-h-[44px] max-h-[120px] resize-none"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter' && !e.shiftKey) {
+                                        e.preventDefault();
+                                        handleSendMessage();
+                                    }
+                                }}
+                            />
+                            <Button 
+                                size="icon" 
+                                onClick={handleSendMessage} 
+                                disabled={!chatMessage.trim() || isMessageSubmitting}
+                                className="shrink-0 h-[44px] w-[44px]"
+                            >
+                                {isMessageSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                            </Button>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground mt-2 text-center">
+                            Press Enter to send, Shift + Enter for new line.
+                        </p>
+                    </div>
+                </div>
+            </TabsContent>
+
             <TabsContent value="actions" className="space-y-6 p-6">
                 <h3 className="font-semibold font-headline text-lg">Candidate Management</h3>
                 <div className="space-y-4 rounded-lg border p-4">
