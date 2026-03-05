@@ -30,6 +30,22 @@ export type SubscriptionPlan = {
   isPopular?: boolean; // UI indicator
 };
 
+export type ActiveSubscription = {
+  id: number;
+  plan: number;
+  plan_name: string;
+  start_date: string;
+  end_date: string;
+  is_active: boolean;
+  purchased_hr_seats: number;
+  total_allowed_hr: number;
+};
+
+export type ActiveSubscriptionResponse = {
+  subscription: ActiveSubscription | null;
+  is_active: boolean;
+};
+
 export type PayUData = {
   key: string;
   txnid: string;

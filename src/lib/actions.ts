@@ -4,7 +4,7 @@
 import { analyzeResume } from "@/ai/flows/resume-analyzer";
 import { z } from "zod";
 import { cookies } from "next/headers";
-import type { Job, NewsPost, CompanyProfile, User, LeadershipMember, Applicant, Note, ProgressReportData, ChatMessage, SubscriptionPlan, PayUData } from "./data";
+import type { Job, NewsPost, CompanyProfile, User, LeadershipMember, Applicant, Note, ProgressReportData, ChatMessage, SubscriptionPlan, PayUData, ActiveSubscriptionResponse } from "./data";
 import crypto from 'crypto';
 
 import { parseISO } from "date-fns";
@@ -44,6 +44,44 @@ export async function getSubscriptionPlans(): Promise<{ success: boolean; data?:
     return { success: true, data: (result.results || []) as SubscriptionPlan[] };
   } catch (error: any) {
     console.error("Get Subscription Plans Error:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function getActiveSubscription(): Promise<{ success: boolean; data?: ActiveSubscriptionResponse; error?: string }> {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value;
+
+  if (!accessToken) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  // ✅ EXACT URL PROVIDED BY USER
+  const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/active-subscription/`;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
+
+    const result = await tryJson(response);
+
+    if (!response.ok) {
+      // If 404, might mean no active subscription, which is a valid state for UI
+      if (response.status === 404) {
+          return { success: true, data: { subscription: null, is_active: false } };
+      }
+      throw new Error(result.detail || `Failed to fetch active subscription (Status: ${response.status})`);
+    }
+
+    return { success: true, data: result as ActiveSubscriptionResponse };
+  } catch (error: any) {
+    console.error("Get Active Subscription Error:", error);
     return { success: false, error: error.message };
   }
 }
