@@ -4,8 +4,8 @@
 import { analyzeResume } from "@/ai/flows/resume-analyzer";
 import { z } from "zod";
 import { cookies } from "next/headers";
-import type { Job, NewsPost, CompanyProfile, User, LeadershipMember, Applicant, Note, ProgressReportData, ChatMessage } from "./data";
-
+import type { Job, NewsPost, CompanyProfile, User, LeadershipMember, Applicant, Note, ProgressReportData, ChatMessage, SubscriptionPlan, PayUData } from "./data";
+import crypto from 'crypto';
 
 import { parseISO } from "date-fns";
 
@@ -18,6 +18,107 @@ async function tryJson(response: Response) {
         console.error(`[API Error] Non-JSON response from ${response.url}. Status: ${response.status}. Body starts with: ${text.substring(0, 200)}`);
         throw new Error(`Server returned non-JSON response (${response.status}). This often means the API URL is incorrect or the server encountered an error.`);
     }
+}
+
+// -------- Subscription Plans --------
+
+export async function getSubscriptionPlans(): Promise<{ success: boolean; data?: SubscriptionPlan[]; error?: string }> {
+  // In a real app, you'd fetch this from your DB or a billing service (Stripe/PayU product list)
+  const plans: SubscriptionPlan[] = [
+    {
+      id: 'plan_free',
+      name: 'Starter',
+      price: 0,
+      currency: 'INR',
+      interval: 'month',
+      features: ['Up to 3 Active Jobs', 'Standard Resume Analysis', 'Basic Chat Support', '1 Team Member'],
+    },
+    {
+      id: 'plan_pro',
+      name: 'Professional',
+      price: 4999,
+      currency: 'INR',
+      interval: 'month',
+      features: ['Unlimited Active Jobs', 'Advanced AI Fit Scoring', 'Priority Chat & Video', '5 Team Members', 'Custom Brand Profile'],
+      isPopular: true,
+    },
+    {
+      id: 'plan_enterprise',
+      name: 'Enterprise',
+      price: 14999,
+      currency: 'INR',
+      interval: 'month',
+      features: ['Everything in Pro', 'Custom AI Model Training', 'Dedicated Account Manager', 'Unlimited Team Members', 'API Access'],
+    }
+  ];
+
+  return { success: true, data: plans };
+}
+
+// -------- PayU Integration --------
+
+export async function initiatePayUPayment(planId: string): Promise<{ success: boolean; data?: PayUData; error?: string }> {
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value;
+
+  if (!accessToken) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  // 1. Fetch user details for PayU form
+  let user;
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/v1/employer/employer/me/`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (response.ok) {
+      user = await response.json();
+    }
+  } catch (e) {
+    console.error("Failed to fetch user for payment:", e);
+  }
+
+  if (!user) return { success: false, error: "Could not retrieve user info." };
+
+  // 2. Fetch Plan price
+  const { data: plans } = await getSubscriptionPlans();
+  const plan = plans?.find(p => p.id === planId);
+  if (!plan) return { success: false, error: "Invalid plan selected." };
+
+  // 3. Prepare PayU parameters
+  const merchantKey = process.env.PAYU_MERCHANT_KEY || 'GTK38V'; // Use placeholder or env
+  const salt = process.env.PAYU_MERCHANT_SALT || 'eCwVEv7v'; // Use placeholder or env
+  const txnid = `txn_${Date.now()}`;
+  const amount = plan.price.toString();
+  const productinfo = plan.name;
+  const firstname = user.company_name || 'HR Admin';
+  const email = user.user_email || 'test@example.com';
+  const phone = user.phone_number || '9999999999';
+  
+  // PayU URLs (Replace with your actual site domain in production)
+  const surl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9003'}/dashboard/subscription/success`;
+  const furl = `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:9003'}/dashboard/subscription/failure`;
+
+  // 4. Generate Hash (Server-side only for security)
+  // sha512(key|txnid|amount|productinfo|firstname|email|udf1|udf2|udf3|udf4|udf5||||||salt)
+  const hashString = `${merchantKey}|${txnid}|${amount}|${productinfo}|${firstname}|${email}|||||||||||${salt}`;
+  const hash = crypto.createHash('sha512').update(hashString).digest('hex');
+
+  const payUData: PayUData = {
+    key: merchantKey,
+    txnid,
+    amount,
+    productinfo,
+    firstname,
+    email,
+    phone,
+    surl,
+    furl,
+    hash,
+    action: process.env.NODE_ENV === 'production' ? 'https://secure.payu.in/_payment' : 'https://test.payu.in/_payment',
+  };
+
+  return { success: true, data: payUData };
 }
 
 // -------- Resume Analysis --------
@@ -1024,7 +1125,7 @@ export async function getApplicantsForJob(jobId: number, jobTitle: string) {
 
 export async function updateApplicantStatus(applicationId: number, status: Applicant['status']) {
     const cookieStore = await cookies();
-    const accessToken = cookieStore.get('accessToken')?.value;
+    const accessToken = cookieStore.get("accessToken")?.value;
 
     if (!accessToken) {
         return { success: false, error: "Not authenticated" };
@@ -1070,7 +1171,7 @@ export async function getApplicantNotes(applicationId: number) {
     try {
         const response = await fetch(url, {
             method: 'GET',
-            headers: { 'Authorization': `Bearer ${accessToken}` },
+            headers: { 'Authorization': `Bearer ${token}`, },
             cache: 'no-store',
         });
 

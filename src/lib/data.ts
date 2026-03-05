@@ -15,6 +15,30 @@ export type User = {
   can_manage_team: boolean;
 };
 
+export type SubscriptionPlan = {
+  id: string;
+  name: string;
+  price: number;
+  currency: string;
+  interval: 'month' | 'year';
+  features: string[];
+  isPopular?: boolean;
+};
+
+export type PayUData = {
+  key: string;
+  txnid: string;
+  amount: string;
+  productinfo: string;
+  firstname: string;
+  email: string;
+  phone: string;
+  surl: string;
+  furl: string;
+  hash: string;
+  action: string;
+};
+
 export type ScreeningQuestion = {
   question: string;
   type: 'text' | 'boolean';
