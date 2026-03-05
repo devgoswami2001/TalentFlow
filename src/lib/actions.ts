@@ -8,6 +8,17 @@ import type { Job, NewsPost, CompanyProfile, User, LeadershipMember, Applicant, 
 
 
 import { parseISO } from "date-fns";
+
+// Helper to safely parse JSON or return a descriptive error
+async function tryJson(response: Response) {
+    const text = await response.text();
+    try {
+        return JSON.parse(text);
+    } catch (e) {
+        throw new Error(`Server returned non-JSON response (${response.status}). This often means the API URL is incorrect or the server crashed. Response start: ${text.substring(0, 100)}`);
+    }
+}
+
 // -------- Resume Analysis --------
 
 const AnalyzeResumeSchema = z.object({
@@ -140,9 +151,7 @@ export async function getDashboardPageData(accessToken?: string) {
 
 // -------- Jobs: mapping helpers --------
 
-// Convert our form data into the format the API expects.
 const convertToApiPayload = (jobData: Partial<Job>, status?: "Active" | "Draft" | "Closed") => {
-  // explicit mapping from status → is_active for deterministic server behavior
   const isActive =
     status === "Active" ? true :
     status === "Closed" ? false :
@@ -168,9 +177,7 @@ const convertToApiPayload = (jobData: Partial<Job>, status?: "Active" | "Draft" 
   };
 };
 
-// Convert API response (list or minimal) to our frontend Job type
 const convertFromApiListPayload = (result: any): Job => {
-  // Try to normalize a posted-at ISO string if present on list payloads
   const createdAtISO =
     result.created_at ||
     (result.created_date ? new Date(result.created_date).toISOString() : undefined);
@@ -198,7 +205,6 @@ const convertFromApiListPayload = (result: any): Job => {
   };
 };
 
-// Convert API response (detail/create/update) to our frontend Job type
 const convertFromApiDetailPayload = (result: any): Job => {
   return {
     id: result.id,
@@ -214,7 +220,7 @@ const convertFromApiDetailPayload = (result: any): Job => {
     applicationDeadline: result.deadline,
     is_active: !!result.is_active,
     status: result.is_active ? "Active" : "Closed",
-    datePosted: result.created_at, // ISO string from detail
+    datePosted: result.created_at,
     screeningQuestions: (result.screening_questions ?? []).map((q: any) => ({
       question: q.question,
       type: q.type || "text",
@@ -255,7 +261,7 @@ export async function createOrUpdateJob(jobData: Partial<Job>, status: "Active" 
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = await tryJson(response);
       let errorMessage = "Failed to save job posting.";
       if (typeof errorData === "object" && errorData !== null) {
         const messages = Object.values(errorData)
@@ -303,18 +309,16 @@ export async function getMyJobs() {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = await tryJson(response);
       throw new Error(errorData.detail || "Failed to fetch jobs.");
     }
 
     const results = await response.json();
 
-    // If the list is paginated and minimal, hydrate each job with its full detail
     const minimalJobs: Job[] = Array.isArray(results.results)
       ? results.results.map(convertFromApiListPayload)
       : [];
 
-    // Hydrate details for complete card/form data
     const hydrated = await Promise.all(
       minimalJobs.map(async (j) => {
         try {
@@ -359,7 +363,7 @@ export async function deleteJob(jobId: number) {
       return { success: true };
     }
 
-    const errorData = await response.json();
+    const errorData = await tryJson(response);
     throw new Error(errorData.detail || "Failed to delete job.");
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -389,7 +393,7 @@ export async function deactivateJob(jobId: number) {
       return { success: true };
     }
 
-    const errorData = await response.json();
+    const errorData = await tryJson(response);
     throw new Error(errorData.detail || "Failed to deactivate job.");
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -416,7 +420,7 @@ export async function getJobById(jobId: number) {
       if (response.status === 404) {
         return { data: null, error: "The requested job posting could not be found." };
       }
-      const errorData = await response.json();
+      const errorData = await tryJson(response);
       throw new Error(errorData.detail || `Failed to fetch job #${jobId}.`);
     }
 
@@ -451,7 +455,7 @@ export async function getNewsPosts(accessToken?: string) {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
+            const errorData = await tryJson(response);
             throw new Error(errorData.detail || "Failed to fetch news posts.");
         }
 
@@ -494,7 +498,7 @@ export async function createOrUpdateNewsPost(formData: FormData, postId: number 
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = await tryJson(response);
       console.error("News Post API Error:", errorData);
       const errorMessage = typeof errorData === "string" ? errorData : JSON.stringify(errorData);
       throw new Error(errorMessage);
@@ -527,7 +531,7 @@ export async function deleteNewsPost(postId: number) {
       return { success: true };
     }
 
-    const errorData = await response.json();
+    const errorData = await tryJson(response);
     throw new Error(errorData.detail || "Failed to delete news post.");
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -595,7 +599,7 @@ export async function createHrUser(formData: z.infer<typeof hrUserFormSchema>): 
       body: JSON.stringify(apiPayload),
     });
 
-    const result = await response.json();
+    const result = await tryJson(response);
 
     if (!response.ok) {
       return {
@@ -653,7 +657,7 @@ export async function updateHrUser(userId: number, formData: Partial<z.infer<typ
       body: JSON.stringify(apiPayload),
     });
 
-    const result = await response.json();
+    const result = await tryJson(response);
 
     if (!response.ok) {
       return {
@@ -689,7 +693,7 @@ export async function getHrUsers() {
     });
 
     if (!response.ok) {
-      const errorData = await response.json();
+      const errorData = await tryJson(response);
       throw new Error(errorData.detail || "Failed to fetch HR users.");
     }
 
@@ -720,7 +724,7 @@ export async function deleteHrUser(userId: number) {
       return { success: true };
     }
 
-    const errorData = await response.json();
+    const errorData = await tryJson(response);
     throw new Error(errorData.detail || "Failed to delete HR user.");
   } catch (error: any) {
     return { success: false, error: error.message };
@@ -742,7 +746,6 @@ const mapApiToCompanyProfile = (apiData: any): CompanyProfile => {
     total_applications_count: apiData.total_applications_count ?? 0,
     followers_count: apiData.followers_count ?? 0,
 
-    // ✅ use entire object as it is
     user_permissions: {
       can_edit_profile: apiData.user_permissions?.can_edit_profile ?? false,
     },
@@ -790,7 +793,7 @@ export async function getCompanyProfile(token?: string) {
       if (response.status === 404) {
         return { data: null, error: "Company profile not found. Please create one." };
       }
-      const errorData = await response.json();
+      const errorData = await tryJson(response);
       throw new Error(errorData.detail || "Failed to fetch company profile.");
     }
 
@@ -826,15 +829,13 @@ export async function updateCompanyProfile(formData: FormData) {
       body: formData,
     });
 
-    const result = await response.json();
+    const result = await tryJson(response);
 
     if (!response.ok) {
-      console.error("Update profile failed:", result); // 👈 log full response
+      console.error("Update profile failed:", result);
 
-      // Build friendly error message
       let errorMessage = result.message || result.detail || "Validation failed";
       if (result.errors) {
-        // Flatten field errors into a readable string
         const fieldErrors = Object.entries(result.errors)
           .map(([field, msgs]) => `${field}: ${(msgs as string[]).join(", ")}`)
           .join(" | ");
@@ -878,7 +879,7 @@ export async function createLeadershipMember(formData: FormData): Promise<Server
             body: formData,
         });
         
-        const result = await response.json();
+        const result = await tryJson(response);
 
         if (!response.ok) {
             return {
@@ -914,7 +915,7 @@ export async function updateLeadershipMember(memberId: number, formData: FormDat
             body: formData,
         });
         
-        const result = await response.json();
+        const result = await tryJson(response);
 
         if (!response.ok) {
             return {
@@ -950,7 +951,7 @@ export async function deleteLeadershipMember(memberId: number): Promise<ServerAc
         });
         
         if (response.status !== 204) {
-            const result = await response.json();
+            const result = await tryJson(response);
             return {
                 success: false,
                 message: result.detail || "Failed to delete leadership member.",
@@ -1006,7 +1007,7 @@ export async function getApplicantsForJob(jobId: number, jobTitle: string) {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
+            const errorData = await tryJson(response);
             throw new Error(errorData.detail || `Failed to fetch applicants for job #${jobId}`);
         }
 
@@ -1041,7 +1042,7 @@ export async function updateApplicantStatus(applicationId: number, status: Appli
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
+            const errorData = await tryJson(response);
             throw new Error(errorData.detail || `Failed to update status for application #${applicationId}`);
         }
 
@@ -1073,7 +1074,7 @@ export async function getApplicantNotes(applicationId: number) {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
+            const errorData = await tryJson(response);
             throw new Error(errorData.detail || `Failed to fetch notes for application #${applicationId}`);
         }
 
@@ -1106,7 +1107,7 @@ export async function addApplicantNote(applicationId: number, remark: string) {
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
+            const errorData = await tryJson(response);
             throw new Error(errorData.remark?.[0] || errorData.detail || `Failed to add note.`);
         }
 
@@ -1138,7 +1139,7 @@ export async function deleteApplicantNote(remarkId: number) {
             return { success: true };
         }
 
-        const errorData = await response.json();
+        const errorData = await tryJson(response);
         throw new Error(errorData.detail || `Failed to delete note #${remarkId}.`);
 
     } catch (error: any) {
@@ -1164,7 +1165,7 @@ export async function getApplicantProgressReport(applicationId: string): Promise
         });
 
         if (!response.ok) {
-            const errorData = await response.json();
+            const errorData = await tryJson(response);
             throw new Error(errorData.detail || `Failed to fetch progress report for application #${applicationId}`);
         }
 
@@ -1187,6 +1188,7 @@ export async function getChatMessages(applicationId: number) {
         return { success: false, error: "Not authenticated" };
     }
     
+    // Using trailing slash as per specification/common Django behavior
     const url = `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/job-chat/messages/?job_application_id=${applicationId}`;
 
     try {
@@ -1198,7 +1200,7 @@ export async function getChatMessages(applicationId: number) {
 
         if (!response.ok) {
             if (response.status === 404) return { success: true, data: [] };
-            const errorData = await response.json();
+            const errorData = await tryJson(response);
             throw new Error(errorData.detail || `Failed to fetch chat messages.`);
         }
 
@@ -1224,7 +1226,6 @@ export async function sendChatMessage(applicationId: number, message: string, fi
     try {
         let response;
         if (file) {
-            // Send as Form Data (Text + File or File only)
             const formData = new FormData();
             formData.append("job_application_id", applicationId.toString());
             if (message) formData.append("message", message);
@@ -1238,7 +1239,6 @@ export async function sendChatMessage(applicationId: number, message: string, fi
                 body: formData,
             });
         } else {
-            // Send as JSON (Text only)
             response = await fetch(url, {
                 method: 'POST',
                 headers: { 
@@ -1252,12 +1252,12 @@ export async function sendChatMessage(applicationId: number, message: string, fi
             });
         }
 
+        const result = await tryJson(response);
+
         if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.message || errorData.detail || `Failed to send message.`);
+            throw new Error(result.message || result.detail || `Failed to send message (Status: ${response.status})`);
         }
 
-        const result = await response.json();
         return { success: true, data: result as ChatMessage };
 
     } catch (error: any) {
